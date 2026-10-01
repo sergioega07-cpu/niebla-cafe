@@ -399,6 +399,7 @@
   const drawer = $("#cart"), backdrop = $("#cart-backdrop"), fab = $("#cart-open");
   let lastFocus = null;
   function openCart() {
+    if (menuIsOpen()) closeMenu({ restoreFocus: false }); // solo un panel abierto a la vez
     lastFocus = document.activeElement;
     $("#toast").classList.remove("is-on");
     backdrop.hidden = false;
@@ -417,8 +418,85 @@
   fab.addEventListener("click", openCart);
   $("#cart-close").addEventListener("click", closeCart);
   backdrop.addEventListener("click", closeCart);
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && drawer.classList.contains("is-open")) closeCart(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (drawer.classList.contains("is-open")) closeCart();
+    else if (menuIsOpen()) closeMenu();
+  });
   $$("[data-close-cart]").forEach((a) => a.addEventListener("click", closeCart));
+
+  /* ---------- Menú de celular (panel lateral) ---------- */
+  const menu = $("#menu"), menuToggle = $("#menu-toggle");
+  const BG_SELECTORS = "main, .footer, .cart-fab, .skip";
+  let menuT;
+  function menuIsOpen() { return menu.classList.contains("is-open"); }
+  function setInert(on) { $$(BG_SELECTORS).forEach((el) => { if (on) el.setAttribute("inert", ""); else el.removeAttribute("inert"); }); }
+  function openMenu() {
+    if (drawer.classList.contains("is-open")) closeCart();
+    clearTimeout(menuT);
+    menu.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => menu.classList.add("is-open")));
+    menuToggle.setAttribute("aria-expanded", "true");
+    menuToggle.setAttribute("aria-label", "Cerrar menú");
+    document.body.classList.add("menu-open");
+    setInert(true);
+    setTimeout(() => ($(".menu__list a.is-active", menu) || $(".menu__list a", menu))?.focus({ preventScroll: true }), reduceMotion ? 0 : 120);
+  }
+  function closeMenu({ restoreFocus = true } = {}) {
+    menu.classList.remove("is-open");
+    menuToggle.setAttribute("aria-expanded", "false");
+    menuToggle.setAttribute("aria-label", "Abrir menú");
+    document.body.classList.remove("menu-open");
+    setInert(false);
+    clearTimeout(menuT);
+    menuT = setTimeout(() => { if (!menuIsOpen()) menu.hidden = true; }, reduceMotion ? 0 : 560);
+    if (restoreFocus) menuToggle.focus({ preventScroll: true });
+  }
+  menuToggle.addEventListener("click", () => (menuIsOpen() ? closeMenu() : openMenu()));
+  $$("[data-close-menu]", menu).forEach((el) => el.addEventListener("click", () => closeMenu()));
+  $$(".menu__list a", menu).forEach((a) => a.addEventListener("click", (e) => {
+    const target = document.querySelector(a.getAttribute("href"));
+    if (!target) return;
+    e.preventDefault();
+    closeMenu({ restoreFocus: false }); // desbloquea el scroll antes de desplazarse
+    requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      history.replaceState(null, "", a.getAttribute("href"));
+      target.setAttribute("tabindex", "-1"); target.focus({ preventScroll: true });
+    });
+  }));
+  // Si la pantalla pasa a escritorio con el menú abierto, se cierra (el panel se oculta en CSS)
+  window.matchMedia("(min-width: 900px)").addEventListener("change", (mq) => { if (mq.matches && menuIsOpen()) closeMenu({ restoreFocus: false }); });
+
+  /* ---------- Sección activa en la navegación (desktop + panel) ---------- */
+  const NAV_IDS = ["nosotros", "cafe", "aprende", "misiones", "contacto"];
+  const navLinks = $$("[data-nav]");
+  let activeId = "";
+  function setActive(id) {
+    if (id === activeId) return;
+    activeId = id;
+    navLinks.forEach((a) => {
+      const on = a.dataset.nav === id;
+      a.classList.toggle("is-active", on);
+      if (on) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current");
+    });
+  }
+  const visibleSections = new Set();
+  const atBottom = () => innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
+  function pickActive() {
+    // Al final de la página, Contacto (es corta y puede no cruzar la franja central)
+    if (atBottom()) return setActive("contacto");
+    const id = NAV_IDS.filter((i) => visibleSections.has(i)).pop();
+    setActive(id || "");
+  }
+  if ("IntersectionObserver" in window) {
+    const navIO = new IntersectionObserver((entries) => {
+      entries.forEach((en) => (en.isIntersecting ? visibleSections.add(en.target.id) : visibleSections.delete(en.target.id)));
+      pickActive();
+    }, { rootMargin: "-40% 0px -55% 0px", threshold: 0 }); // franja cerca del centro de la pantalla
+    NAV_IDS.forEach((id) => { const el = document.getElementById(id); if (el) navIO.observe(el); });
+    window.addEventListener("scroll", () => { if (atBottom() || activeId === "contacto") pickActive(); }, { passive: true });
+  }
 
   // Toast
   let toastT;

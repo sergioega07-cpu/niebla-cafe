@@ -158,7 +158,70 @@ em { font-family: var(--f-accent); font-style: italic; font-weight: 400; letter-
 .nav__wa { display: inline-flex; align-items: center; gap: .45rem; text-decoration: none; color: var(--parchment); font: 500 .7rem/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; padding: .6rem .9rem; border: 1px solid rgba(216, 199, 161, .25); border-radius: 999px; transition: border-color .3s, color .3s; }
 .nav__wa:hover { border-color: var(--gold); color: #fff; }
 .nav__wa span { display: none; }
-@media (min-width: 900px) { .nav__links { display: flex; } .nav__wa span { display: inline; } }
+.nav__actions { display: flex; align-items: center; gap: .55rem; }
+/* Sección activa (desktop y panel) */
+.nav__links a { position: relative; padding: .35rem 0; }
+.nav__links a::after { content: ""; position: absolute; left: 50%; right: 50%; bottom: -.35rem; height: 1px; background: var(--gold); box-shadow: 0 0 10px rgba(224, 168, 64, .8); opacity: 0; transition: left .45s var(--ease), right .45s var(--ease), opacity .45s; }
+.nav__links a.is-active { color: var(--gold); text-shadow: 0 0 16px rgba(224, 168, 64, .45); }
+.nav__links a.is-active::after { left: 0; right: 0; opacity: 1; }
+
+/* Botón hamburguesa (solo celular / tablet) */
+.nav__toggle { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 1px solid rgba(216, 199, 161, .25); background: rgba(8, 6, 5, .35); cursor: pointer; transition: border-color .3s, box-shadow .3s; }
+.nav__toggle:hover, .nav__toggle[aria-expanded="true"] { border-color: var(--gold); box-shadow: 0 0 18px rgba(224, 168, 64, .25); }
+.nav__burger { position: relative; width: 18px; height: 12px; }
+.nav__burger i { position: absolute; left: 0; right: 0; height: 1.5px; border-radius: 2px; background: var(--parchment); transition: transform .4s var(--ease), opacity .3s, top .4s var(--ease); }
+.nav__burger i:nth-child(1) { top: 0; }
+.nav__burger i:nth-child(2) { top: 5.25px; }
+.nav__burger i:nth-child(3) { top: 10.5px; }
+.nav__toggle[aria-expanded="true"] .nav__burger i:nth-child(1) { top: 5.25px; transform: rotate(45deg); }
+.nav__toggle[aria-expanded="true"] .nav__burger i:nth-child(2) { opacity: 0; }
+.nav__toggle[aria-expanded="true"] .nav__burger i:nth-child(3) { top: 5.25px; transform: rotate(-45deg); }
+.nav__wa { min-height: 44px; min-width: 44px; justify-content: center; }
+@media (min-width: 900px) { .nav__links { display: flex; } .nav__wa span { display: inline; } .nav__toggle, .menu { display: none !important; } }
+
+/* Panel del menú (debajo del encabezado, que sigue visible con WhatsApp y el botón cerrar) */
+body.menu-open { overflow: hidden; }
+body.menu-open .nav { background: rgba(8, 6, 5, .92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 1px 0 var(--line); }
+body.menu-open .cart-fab { opacity: 0; pointer-events: none; }
+.menu { position: fixed; inset: 0; z-index: 38; }
+.menu__backdrop { position: absolute; inset: 0; background: rgba(4, 3, 3, .62); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; transition: opacity .45s var(--ease); }
+.menu__panel {
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(380px, 86vw); overflow-y: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column;
+  padding: calc(5.4rem + env(safe-area-inset-top)) 1.8rem calc(2rem + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(90% 45% at 100% 0%, rgba(167, 90, 43, .16), transparent 70%),
+    radial-gradient(80% 40% at 0% 100%, rgba(29, 39, 32, .5), transparent 70%),
+    linear-gradient(180deg, #0c0907, #080605 60%, #090807);
+  border-left: 1px solid var(--line);
+  box-shadow: -30px 0 80px -20px rgba(0, 0, 0, .9), -10px 0 60px -30px rgba(224, 150, 70, .25);
+  transform: translateX(104%); transition: transform .55s var(--ease);
+}
+.dev-banner:not([hidden]) ~ .menu .menu__panel { padding-top: calc(7.2rem + env(safe-area-inset-top)); }
+.menu.is-open .menu__backdrop { opacity: 1; }
+.menu.is-open .menu__panel { transform: none; }
+.menu__kicker { font: 500 .64rem/1.2 var(--f-mono); letter-spacing: .24em; text-transform: uppercase; color: var(--gold); opacity: .85; margin: 0 0 1.2rem; }
+.menu__list { list-style: none; margin: 0; padding: 0; counter-reset: none; }
+.menu__list li { border-bottom: 1px solid var(--line); opacity: 0; transform: translateX(14px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+.menu__list li:first-child { border-top: 1px solid var(--line); }
+.menu.is-open .menu__list li { opacity: 1; transform: none; }
+.menu.is-open .menu__list li:nth-child(2) { transition-delay: .05s; }
+.menu.is-open .menu__list li:nth-child(3) { transition-delay: .1s; }
+.menu.is-open .menu__list li:nth-child(4) { transition-delay: .15s; }
+.menu.is-open .menu__list li:nth-child(5) { transition-delay: .2s; }
+.menu__list a { display: flex; align-items: baseline; gap: 1.1rem; padding: 1.05rem .3rem; text-decoration: none; color: var(--ink); transition: color .3s, text-shadow .3s; }
+.menu__n { flex: none; width: 2.2rem; font: italic 500 1.25rem/1 var(--f-accent); color: var(--gold); opacity: .7; }
+.menu__t { font: 500 1.45rem/1.1 var(--f-title); letter-spacing: .08em; }
+.menu__list a:hover, .menu__list a:focus-visible { color: #fff; }
+.menu__list a.is-active { color: var(--gold); text-shadow: 0 0 22px rgba(224, 168, 64, .45); }
+.menu__list a.is-active .menu__n { opacity: 1; }
+.menu__list a.is-active .menu__t::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: .7rem; vertical-align: middle; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+.menu__foot { margin: auto 0 0; padding-top: 2rem; font: 400 .66rem/1.9 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-faint); }
+.menu__foot a { color: var(--parchment); text-decoration: none; border-bottom: 1px solid rgba(216, 199, 161, .3); }
+@media (prefers-reduced-motion: reduce) {
+  .menu__panel, .menu__backdrop, .menu__list li, .nav__burger i, .nav__links a::after { transition: none !important; }
+  .menu__list li { transform: none; }
+}
 
 .dev-banner {
   position: fixed; top: 0; left: 0; right: 0; z-index: 45; height: 28px;
@@ -414,3 +477,4 @@ body.cart-open { overflow: hidden; }
   font: 400 .72rem/1.2 var(--f-mono); letter-spacing: .1em; box-shadow: 0 10px 40px -10px #000; transition: opacity .4s, translate .4s var(--ease); width: max-content; max-width: calc(100% - 2rem); text-align: center;
 }
 .toast.is-on { opacity: 1; translate: -50% 0; }
+main section[tabindex="-1"]:focus { outline: none; }
