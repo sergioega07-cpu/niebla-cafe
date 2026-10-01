@@ -3,8 +3,10 @@
    --------------------------------------------------------------------------
    Catálogo: Google Sheet con columnas
    id,nombre,categoria,origen,proceso,tueste,notas_sabor,fecha_tostado,formato,
-   molienda,precio_clp,stock,descripcion,imagen_url,visible
+   molienda,precio_clp,stock,descripcion,imagen_url,visible,altura,variedad
    - Una fila por producto + formato. Filas con el mismo id = mismo café.
+   - imagen_url: ruta de la etiqueta (ej: assets/labels/vampiros.webp) o URL completa.
+   - altura y variedad son opcionales (ej: "1400 msnm", "Parainema").
    - visible = NO oculta la fila.
    - molienda: opciones separadas por "|" (ej: Grano|Molido espresso|Molido filtro).
    - fecha_tostado: AAAA-MM-DD o DD/MM/AAAA.
@@ -88,12 +90,13 @@
         map.set(r.id, {
           id: r.id, nombre: r.nombre, categoria: r.categoria, origen: r.origen, proceso: r.proceso,
           tueste: r.tueste, notas: (r.notas_sabor || "").split(/[,;·]/).map((s) => s.trim()).filter(Boolean),
-          fecha: parseDate(r.fecha_tostado), descripcion: r.descripcion, imagen: r.imagen_url, formatos: [],
+          fecha: parseDate(r.fecha_tostado), descripcion: r.descripcion, imagen: r.imagen_url,
+          altura: r.altura, variedad: r.variedad, formatos: [],
         });
       }
       const p = map.get(r.id);
       // Si alguna fila del grupo trae más info, se completa
-      for (const k of ["nombre", "categoria", "origen", "proceso", "tueste", "descripcion"]) if (!p[k] && r[k]) p[k] = r[k];
+      for (const k of ["nombre", "categoria", "origen", "proceso", "tueste", "descripcion", "altura", "variedad"]) if (!p[k] && r[k]) p[k] = r[k];
       if (!p.imagen && r.imagen_url) p.imagen = r.imagen_url;
       const fd = parseDate(r.fecha_tostado);
       if (fd && (!p.fecha || fd > p.fecha)) p.fecha = fd;
@@ -209,11 +212,11 @@
     const fresh = p.fecha && daysSince(p.fecha) >= 0 && daysSince(p.fecha) < DIAS_RECIEN_TOSTADO;
     const allOut = totalStock(p) <= 0;
     const media = p.imagen
-      ? `<img src="${esc(p.imagen)}" alt="${esc(p.nombre)}" loading="lazy" decoding="async">`
+      ? `<img src="${esc(p.imagen)}" alt="Etiqueta de ${esc(p.nombre)}${p.origen ? ` · ${esc(p.origen)}` : ""}" width="520" height="800" loading="lazy" decoding="async">`
       : bagSVG(p, idx);
     return `
     <article class="card product reveal ${allOut ? "is-out" : ""}" data-id="${esc(p.id)}" style="--d:${(idx % 3) * 0.08}s">
-      <div class="product__media">
+      <div class="product__media ${p.imagen ? "product__media--label" : ""}">
         ${media}
         <div class="product__badges">
           <span>${fresh ? `<span class="badge badge--fresh">Recién tostado</span>` : ""}</span>
@@ -224,6 +227,8 @@
         <p class="product__origin">${esc(p.origen || "")}${p.categoria ? ` · ${esc(p.categoria)}` : ""}</p>
         <h3 class="product__name">${esc(p.nombre)}</h3>
         <dl class="product__meta">
+          ${p.altura ? `<div><dt>Altura</dt><dd>${esc(p.altura)}</dd></div>` : ""}
+          ${p.variedad ? `<div><dt>Variedad</dt><dd>${esc(p.variedad)}</dd></div>` : ""}
           ${p.proceso ? `<div><dt>Proceso</dt><dd>${esc(p.proceso)}</dd></div>` : ""}
           ${p.tueste ? `<div><dt>Tueste</dt><dd>${esc(p.tueste)}${roastDots(p.tueste)}</dd></div>` : ""}
         </dl>
@@ -431,7 +436,7 @@
     const data = {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      name: "Café disponible en Niebla",
+      name: "Niebla Orígenes · café disponible",
       itemListElement: prods.map((p, i) => ({
         "@type": "ListItem",
         position: i + 1,
@@ -440,8 +445,8 @@
           sku: p.id,
           name: p.nombre,
           category: p.categoria || "Café de especialidad",
-          description: [p.descripcion, p.origen && `Origen: ${p.origen}`, p.proceso && `Proceso: ${p.proceso}`, p.tueste && `Tueste: ${p.tueste}`, p.notas.length && `Notas: ${p.notas.join(", ")}`].filter(Boolean).join(". "),
-          ...(p.imagen ? { image: p.imagen } : {}),
+          description: [p.descripcion, p.origen && `Origen: ${p.origen}`, p.altura && `Altura: ${p.altura}`, p.variedad && `Variedad: ${p.variedad}`, p.proceso && `Proceso: ${p.proceso}`, p.tueste && `Tueste: ${p.tueste}`, p.notas.length && `Notas: ${p.notas.join(", ")}`].filter(Boolean).join(". "),
+          ...(p.imagen ? { image: new URL(p.imagen, SITE_URL).href } : {}),
           brand: { "@type": "Brand", name: "Niebla" },
           offers: p.formatos.map((f) => ({
             "@type": "Offer",

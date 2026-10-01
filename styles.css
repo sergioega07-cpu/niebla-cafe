@@ -215,10 +215,19 @@ em { font-family: var(--f-accent); font-style: italic; font-weight: 400; letter-
 .story__pillars { list-style: none; padding: 0; margin: 2rem 0 0; display: grid; gap: 1rem; }
 .story__pillars .card { padding: 1.5rem 1.5rem 1.4rem; }
 .story__pillars p { margin: .5rem 0 0; color: var(--ink-soft); font-size: .95rem; }
+.story__pillars--two .card { padding: 1.8rem 1.8rem 1.7rem; }
+.story__pillars--two p { font-size: 1rem; line-height: 1.7; }
+.story__label { font: 500 .7rem/1.2 var(--f-mono); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 .9rem; opacity: .9; }
+.story__text .lead { font-family: var(--f-title); font-size: clamp(1.45rem, 3.2vw, 2rem); line-height: 1.25; letter-spacing: .02em; margin: 0 0 1rem; }
+.emblem { display: block; height: auto; opacity: .88; filter: drop-shadow(0 0 22px rgba(224, 168, 64, .22)); margin-bottom: 1.2rem; }
+.emblem--hat { width: clamp(84px, 11vw, 120px); }
+.emblem--book { width: clamp(64px, 8vw, 88px); margin-inline: auto; opacity: .8; }
+.section__note { margin: .9rem auto 0; max-width: 52ch; font-size: .92rem; color: var(--ink-faint); }
 .pillar__n { display: block; font: italic 500 1.4rem/1 var(--f-accent); color: var(--gold); margin-bottom: .6rem; opacity: .8; }
 @media (min-width: 900px) {
   .story__grid { grid-template-columns: 1fr 1.2fr; align-items: start; }
   .story__pillars { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
+  .story__pillars--two { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ---------- Productos ---------- */
@@ -228,6 +237,10 @@ em { font-family: var(--f-accent); font-style: italic; font-weight: 400; letter-
 .product__media { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: radial-gradient(70% 70% at 50% 58%, rgba(167, 90, 43, .34), rgba(20, 14, 11, 0) 70%), linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,0)); }
 .product__media img, .product__media svg { width: 100%; height: 100%; object-fit: cover; }
 .product__media svg { object-fit: contain; }
+/* Etiquetas reales: se muestran completas, sobre negro, con brillo de vela */
+.product__media--label { aspect-ratio: 5 / 6; padding: 3.2rem 1.4rem 1.2rem; background: radial-gradient(60% 55% at 50% 52%, rgba(167, 90, 43, .22), rgba(8, 6, 5, 0) 72%), #080605; }
+.product__media--label img { object-fit: contain; mix-blend-mode: lighten; /* el negro de la etiqueta se funde con el fondo */ transition: transform .8s cubic-bezier(.2, .7, .2, 1); }
+.product:hover .product__media--label img { transform: scale(1.025); }
 .product__badges { position: absolute; top: .9rem; left: .9rem; right: .9rem; display: flex; flex-wrap: wrap; gap: .4rem; justify-content: space-between; }
 .badge { font: 500 .62rem/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; padding: .45rem .65rem; border-radius: 999px; background: rgba(8, 6, 5, .6); border: 1px solid rgba(216, 199, 161, .2); color: var(--parchment); backdrop-filter: blur(6px); }
 .badge--fresh { background: rgba(224, 168, 64, .95); color: #1a0f08; border-color: transparent; box-shadow: 0 0 22px rgba(224, 168, 64, .45); }
@@ -305,6 +318,15 @@ em { font-family: var(--f-accent); font-style: italic; font-weight: 400; letter-
 .mission__price { margin: auto 0 .6rem !important; padding-top: .8rem; font: 400 .72rem/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-faint) !important; }
 .mission__price span { display: block; font: 500 2.3rem/1 var(--f-title); letter-spacing: .03em; color: var(--gold); margin-bottom: .4rem; text-shadow: 0 0 30px rgba(224, 168, 64, .3); }
 .mission .btn { align-self: flex-start; }
+.quest__intro { text-align: center; max-width: 54ch; margin: -1rem auto 2.2rem; color: var(--ink); font-family: var(--f-accent); font-size: clamp(1.15rem, 2.4vw, 1.3rem); }
+.quest { border-color: rgba(142, 42, 34, .35); }
+.quest::after { background: radial-gradient(closest-side, rgba(142, 42, 34, .2), transparent); }
+.quest .mission__price { margin-top: auto !important; }
+.quest .mission__price span { font-size: 1.9rem; color: #e7b56a; }
+.quest__foot { text-align: center; max-width: 60ch; margin: 2.2rem auto 0; color: var(--ink-soft); font-size: .95rem; }
+.quest__foot em { display: block; margin-top: .6rem; font-family: var(--f-accent); font-size: 1.2rem; color: var(--gold); }
+.missions__sub { margin-top: clamp(4rem, 9vw, 6.5rem); }
+.missions__cta { text-align: center; margin: 2rem 0 0; }
 
 /* ---------- Contacto ---------- */
 .contact__inner { text-align: center; max-width: 720px; }
