@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Niebla · Tostaduría mágica en Machalí, Chile | Café de especialidad</title>
+  <meta name="description" content="Niebla es una tostaduría de café de especialidad en Machalí, Chile. Café tostado con dedicación, fecha de tostado visible, talleres de filtrados y espresso. Envíos a todo Chile.">
+  <meta name="theme-color" content="#080605">
+  <link rel="icon" href="assets/logo-placeholder.svg" type="image/svg+xml">
+  <!-- URL pública (GitHub Pages). Si se usa dominio propio, cambiarla aquí, en og:*, JSON-LD y SITE_URL de app.js -->
+  <link rel="canonical" href="https://sergioega07-cpu.github.io/niebla-cafe/">
+
+  <!-- Open Graph / redes -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_CL">
+  <meta property="og:site_name" content="Niebla · Tostaduría mágica">
+  <meta property="og:title" content="Niebla · Tostaduría mágica — Café de especialidad en Machalí">
+  <meta property="og:description" content="Café de especialidad tostado con dedicación en Machalí, Chile. Mira el café disponible, su fecha de tostado y pide directo por WhatsApp. Envíos a todo Chile.">
+  <meta property="og:url" content="https://sergioega07-cpu.github.io/niebla-cafe/">
+  <meta property="og:image" content="https://sergioega07-cpu.github.io/niebla-cafe/assets/og-niebla.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.add("js")</script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["Store", "CafeOrCoffeeShop"],
+    "@id": "https://sergioega07-cpu.github.io/niebla-cafe/#niebla",
+    "name": "Niebla | Tostaduría mágica",
+    "alternateName": "Niebla Roasters",
+    "description": "Tostaduría de café de especialidad en Machalí, Chile. Tostado con dedicación. Envíos a todo Chile.",
+    "url": "https://sergioega07-cpu.github.io/niebla-cafe/",
+    "logo": "https://sergioega07-cpu.github.io/niebla-cafe/assets/logo-placeholder.svg",
+    "image": "https://sergioega07-cpu.github.io/niebla-cafe/assets/og-niebla.png",
+    "telephone": "+56940220026",
+    "servesCuisine": "Café de especialidad",
+    "priceRange": "$$",
+    "currenciesAccepted": "CLP",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Machalí",
+      "addressRegion": "Región del Libertador General Bernardo O'Higgins",
+      "addressCountry": "CL"
+    },
+    "areaServed": { "@type": "Country", "name": "Chile" },
+    "sameAs": ["https://www.instagram.com/niebla_coffee/"]
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#cafe">Saltar al café disponible</a>
+
+  <!-- Atmósfera: gradiente continuo + niebla + grano. Todo detrás del contenido. -->
+  <div class="atmos" aria-hidden="true"></div>
+  <canvas id="fog" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <div id="dev-banner" class="dev-banner" hidden>Datos de ejemplo<span class="dev-banner__more"> · el catálogo real se cargará desde Google Sheets</span></div>
+
+  <header class="nav" id="nav">
+    <a href="#portada" class="nav__brand" aria-label="Niebla, ir al inicio">
+      <img src="assets/logo-placeholder.svg" alt="" width="34" height="34">
+      <span>Niebla</span>
+    </a>
+    <nav class="nav__links" aria-label="Secciones">
+      <a href="#nosotros">Nosotros</a>
+      <a href="#cafe">Café</a>
+      <a href="#aprende">Aprende</a>
+      <a href="#misiones">Misiones</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <a class="nav__wa js-wa" data-wa="Hola Niebla, vengo desde la web y tengo una consulta." href="https://wa.me/56940220026" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.2Z"/></svg>
+      <span>WhatsApp</span>
+    </a>
+  </header>
+
+  <main>
+    <!-- I · PORTADA -->
+    <section id="portada" class="hero">
+      <div class="hero__inner">
+        <div class="hero__medallion reveal">
+          <!-- Logo provisorio: reemplazar assets/logo-placeholder.svg por el medallón oficial -->
+          <img src="assets/logo-placeholder.svg" alt="Medallón de Niebla (logo provisorio)" width="200" height="200">
+        </div>
+        <p class="kicker reveal">Niebla Roasters · Machalí, Chile</p>
+        <h1 class="hero__title reveal">Niebla<span class="hero__dash"> — </span><em>Tostaduría mágica</em></h1>
+        <p class="hero__tagline reveal">La magia solo la ven aquellos que se detienen a observar.<br><span>Café de especialidad, tostado con dedicación.</span></p>
+        <div class="hero__cta reveal">
+          <a href="#cafe" class="btn btn--primary">Ver cafés disponibles</a>
+          <a href="https://wa.me/56940220026" class="btn btn--ghost js-wa" data-wa="Hola Niebla, vengo desde la web y quiero saber qué cafés tienen disponibles." target="_blank" rel="noopener">Hablar con el Brujo Tostador</a>
+        </div>
+        <ul class="hero__claims reveal" aria-label="Lo que nos define">
+          <li>Café fresco todo el año</li>
+          <li>Tostado en pequeños lotes</li>
+          <li>Envíos a todo Chile</li>
+        </ul>
+      </div>
+      <a href="#nosotros" class="hero__scroll" aria-label="Seguir bajando"><span></span></a>
+    </section>
+
+    <!-- II · NOSOTROS -->
+    <section id="nosotros" class="section story">
+      <!-- TEXTO DE EJEMPLO: reemplazar por la historia real de Niebla y de Carlos (el Brujo Tostador). -->
+      <div class="wrap story__grid">
+        <header class="section__head reveal">
+          <p class="kicker">Capítulo II · Nosotros</p>
+          <h2>Detrás de la niebla</h2>
+        </header>
+        <div class="story__text reveal">
+          <p class="lead">En las faldas de la cordillera, donde la niebla baja temprano sobre Machalí, un Brujo Tostador enciende su tambor cada semana.</p>
+          <p>Niebla nació de una obsesión sencilla: que cada grano llegue a tu taza en su mejor momento. Elegimos cafés de especialidad, los tostamos en lotes pequeños y anotamos a mano la fecha de cada tueste, como quien escribe en un grimorio.</p>
+          <p>No vendemos pociones: vendemos café fresco, honesto y trazable, para brujos y brujas que se toman un momento para observar.</p>
+        </div>
+        <ul class="story__pillars">
+          <li class="card reveal"><span class="pillar__n">i</span><h3>Fresco todo el año</h3><p>Tostamos seguido y en poca cantidad. Nada de bodegas eternas.</p></li>
+          <li class="card reveal"><span class="pillar__n">ii</span><h3>Tostado milimétricamente</h3><p>Cada origen tiene su curva. La ajustamos hasta que el café hable.</p></li>
+          <li class="card reveal"><span class="pillar__n">iii</span><h3>Trato directo</h3><p>Pides por WhatsApp y hablas con quien tuesta tu café.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- III · CAFÉ DISPONIBLE -->
+    <section id="cafe" class="section shop">
+      <div class="wrap">
+        <header class="section__head section__head--center reveal">
+          <p class="kicker">Capítulo III · Café disponible</p>
+          <h2>Lo que hay detrás de la niebla</h2>
+          <p class="section__sub">Orígenes que rotan según temporada. Siempre con su fecha de tostado a la vista.</p>
+        </header>
+        <div id="products" class="products" aria-live="polite">
+          <p class="products__loading">Invocando el catálogo…</p>
+        </div>
+        <p class="shop__note reveal">Sin pago en línea: armas tu pedido, lo envías por WhatsApp y coordinamos pago y envío contigo.</p>
+      </div>
+    </section>
+
+    <!-- IV · APRENDE -->
+    <section id="aprende" class="section learn">
+      <div class="wrap">
+        <header class="section__head section__head--center reveal">
+          <p class="kicker">Capítulo IV · Aprende</p>
+          <h2>Pequeño grimorio del café</h2>
+          <p class="section__sub">Lo justo para elegir mejor y preparar con intención.</p>
+        </header>
+
+        <div class="roast-scale reveal" aria-label="Escala de tueste">
+          <div class="roast-scale__bar"></div>
+          <div class="roast-scale__labels"><span>Claro</span><span>Medio</span><span>Oscuro</span></div>
+        </div>
+
+        <div class="learn__grid">
+          <article class="card learn__card reveal">
+            <p class="learn__tag">Tueste claro</p>
+            <h3>Brillante y frutal</h3>
+            <p>Conserva más acidez y aromas del origen: flores, cítricos, frutos rojos. Ideal para métodos de filtrado como V60 o Chemex.</p>
+          </article>
+          <article class="card learn__card reveal">
+            <p class="learn__tag">Tueste medio</p>
+            <h3>Dulce y equilibrado</h3>
+            <p>Caramelo, chocolate, dulce de leche. Un punto de encuentro entre origen y tueste; funciona en casi cualquier preparación.</p>
+          </article>
+          <article class="card learn__card reveal">
+            <p class="learn__tag">Tueste oscuro</p>
+            <h3>Intenso y profundo</h3>
+            <p>Más cuerpo y amargor, notas a cacao y tostado. Aliado del espresso con leche y de la prensa francesa.</p>
+          </article>
+          <article class="card learn__card reveal">
+            <p class="learn__tag">Grano o molido</p>
+            <h3>El aroma vive en el grano</h3>
+            <p>Molido, el café pierde aromas en días. Si tienes molino, compra en grano y muele justo antes. Si no, te lo molemos según tu método.</p>
+          </article>
+          <article class="card learn__card learn__card--wide reveal">
+            <p class="learn__tag">Cómo leer la fecha de tostado</p>
+            <h3>El café también necesita reposar</h3>
+            <ol class="timeline">
+              <li><strong>Días 0–4</strong><span>Recién salido del tambor. Libera CO₂; espera un poco.</span></li>
+              <li><strong>Días 5–30</strong><span>Punto mágico: aromas y dulzor en su mejor momento.</span></li>
+              <li><strong>30–60 días</strong><span>Sigue rico, pero se va apagando. Guárdalo cerrado, lejos de luz y calor.</span></li>
+            </ol>
+            <p class="learn__foot">Por eso cada bolsa de Niebla lleva escrita su fecha de tostado, no solo una fecha de vencimiento.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- V · MISIONES / TALLERES -->
+    <section id="misiones" class="section missions">
+      <div class="wrap">
+        <header class="section__head section__head--center reveal">
+          <p class="kicker">Capítulo V · Misiones</p>
+          <h2>Talleres para aprendices</h2>
+          <p class="section__sub">Jornadas prácticas para entender el café más allá de una receta.</p>
+        </header>
+        <div class="missions__grid">
+          <article class="card mission reveal">
+            <p class="learn__tag">Atelier</p>
+            <h3>Taller de Filtrados</h3>
+            <p>Extracción y TDS, calibración de recetas, agua, percolación e inmersión, y cómo conservar tu café.</p>
+            <p class="mission__price"><span>$60.000</span> por alumno</p>
+            <a class="btn btn--ghost js-wa" href="https://wa.me/56940220026" target="_blank" rel="noopener" data-wa="Hola Niebla, quiero información sobre el Taller de Filtrados ($60.000 por alumno): próximas fechas y cupos.">Consultar por WhatsApp</a>
+          </article>
+          <article class="card mission reveal">
+            <p class="learn__tag">Atelier</p>
+            <h3>Atelier de Espresso</h3>
+            <p>Uso de la máquina, fundamentos de extracción, distribución y tampeo, y cómo calibrar un café desde cero.</p>
+            <p class="mission__price"><span>$80.000</span> por alumno</p>
+            <a class="btn btn--ghost js-wa" href="https://wa.me/56940220026" target="_blank" rel="noopener" data-wa="Hola Niebla, quiero información sobre el Atelier de Espresso ($80.000 por alumno): próximas fechas y cupos.">Consultar por WhatsApp</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- VI · CONTACTO -->
+    <section id="contacto" class="section contact">
+      <div class="wrap contact__inner reveal">
+        <p class="kicker">Capítulo VI · Contacto</p>
+        <h2>Envía un cuervo<br><em>(o un WhatsApp)</em></h2>
+        <ul class="contact__list">
+          <li><span class="contact__label">Taller</span>Machalí, Región de O'Higgins, Chile</li>
+          <li><span class="contact__label">Envíos</span>A todo Chile</li>
+          <li><span class="contact__label">WhatsApp</span><a class="js-wa" href="https://wa.me/56940220026" data-wa="Hola Niebla, vengo desde la web." target="_blank" rel="noopener">+56 9 4022 0026</a></li>
+          <li><span class="contact__label">Instagram</span><a href="https://www.instagram.com/niebla_coffee/" target="_blank" rel="noopener">@niebla_coffee</a></li>
+        </ul>
+        <a class="btn btn--primary js-wa" href="https://wa.me/56940220026" data-wa="Hola Niebla, vengo desde la web y tengo una consulta." target="_blank" rel="noopener">Escribir por WhatsApp</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Niebla · Tostaduría mágica · Machalí, Chile</p>
+    <p class="footer__small">Boceto de sitio · logo, textos y datos provisorios</p>
+  </footer>
+
+  <!-- Carrito -->
+  <button class="cart-fab" id="cart-open" type="button" aria-controls="cart" aria-expanded="false" aria-label="Abrir carrito">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M6 7h12l-1 13H7L6 7Zm3 0V5.5a3 3 0 0 1 6 0V7"/></svg>
+    <span class="cart-fab__count" id="cart-count" hidden>0</span>
+  </button>
+
+  <div class="cart-layer">
+  <div class="cart-backdrop" id="cart-backdrop" hidden></div>
+  <aside class="cart" id="cart" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true">
+    <header class="cart__head">
+      <h2 id="cart-title">Tu pedido</h2>
+      <button class="cart__close" id="cart-close" type="button" aria-label="Cerrar carrito">×</button>
+    </header>
+    <div class="cart__body">
+      <ul class="cart__items" id="cart-items"></ul>
+      <p class="cart__empty" id="cart-empty">Tu caldero está vacío.<br><a href="#cafe" data-close-cart>Ver cafés disponibles</a></p>
+    </div>
+    <footer class="cart__foot" id="cart-foot">
+      <div class="cart__total"><span>Total</span><strong id="cart-total">$0</strong></div>
+      <label class="field">
+        <span>Tu nombre (opcional)</span>
+        <input type="text" id="cart-name" autocomplete="name" placeholder="Ej: Morgana">
+      </label>
+      <a class="btn btn--primary btn--block" id="cart-send" href="https://wa.me/56940220026" target="_blank" rel="noopener">Enviar pedido por WhatsApp</a>
+      <p class="cart__hint">No se cobra nada aquí. Carlos confirma stock, pago y envío por WhatsApp.</p>
+    </footer>
+  </aside>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
