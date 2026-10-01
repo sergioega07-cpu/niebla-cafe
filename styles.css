@@ -478,3 +478,9 @@ body.cart-open { overflow: hidden; }
 }
 .toast.is-on { opacity: 1; translate: -50% 0; }
 main section[tabindex="-1"]:focus { outline: none; }
+
+/* Omniroast (Aprende) */
+.learn__card--omni strong { color: var(--parchment); font-weight: 500; }
+.omni__uses { display: flex; flex-wrap: wrap; gap: .5rem; list-style: none; padding: 0; margin: 1.1rem 0 0; }
+.omni__uses li { font: italic 500 1.05rem/1 var(--f-accent); padding: .4rem .9rem; border-radius: 999px; color: var(--gold); border: 1px solid rgba(224, 168, 64, .35); background: rgba(224, 168, 64, .06); box-shadow: 0 0 18px -6px rgba(224, 168, 64, .35); }
+@media (min-width: 900px) { .learn__grid { grid-template-columns: 1.5fr 1fr; } }
