@@ -70,10 +70,10 @@
       <span>Niebla</span>
     </a>
     <nav class="nav__links" aria-label="Secciones">
-      <a href="#nosotros" data-nav="nosotros">Nosotros</a>
-      <a href="#cafe" data-nav="cafe">Café</a>
+      <a href="#nosotros" data-nav="nosotros" class="nav__stack"><span>Nosotros</span><span class="sr-only"> · </span><small>Misión y Visión</small></a>
       <a href="#aprende" data-nav="aprende">Aprende</a>
       <a href="#misiones" data-nav="misiones">Misiones</a>
+      <a href="#cafe" data-nav="cafe">Café</a>
       <a href="#contacto" data-nav="contacto">Contacto</a>
     </nav>
     <div class="nav__actions">
@@ -93,18 +93,18 @@
     <nav class="menu__panel" aria-label="Menú principal">
       <p class="menu__kicker">Índice del grimorio</p>
       <ol class="menu__list">
-        <li><a href="#nosotros" data-nav="nosotros"><span class="menu__n">I</span><span class="menu__t">Nosotros</span></a></li>
-        <li><a href="#cafe" data-nav="cafe"><span class="menu__n">II</span><span class="menu__t">Café</span></a></li>
-        <li><a href="#aprende" data-nav="aprende"><span class="menu__n">III</span><span class="menu__t">Aprende</span></a></li>
-        <li><a href="#misiones" data-nav="misiones"><span class="menu__n">IV</span><span class="menu__t">Misiones</span></a></li>
-        <li><a href="#contacto" data-nav="contacto"><span class="menu__n">V</span><span class="menu__t">Contacto</span></a></li>
+        <li><a href="#nosotros" data-nav="nosotros"><span class="menu__n">I</span><span class="menu__t">Nosotros<span class="sr-only"> · </span><small class="menu__sub">Misión y Visión</small></span></a></li>
+        <li><a href="#aprende" data-nav="aprende"><span class="menu__n">II</span><span class="menu__t">Aprende</span></a></li>
+        <li><a href="#misiones" data-nav="misiones"><span class="menu__n">III</span><span class="menu__t">Misiones</span></a></li>
+        <li><a href="#cafe" data-nav="cafe"><span class="menu__n menu__n--glyph">✦</span><span class="menu__t">Café</span></a></li>
+        <li><a href="#contacto" data-nav="contacto"><span class="menu__n menu__n--glyph">✦</span><span class="menu__t">Contacto</span></a></li>
       </ol>
       <p class="menu__foot">Machalí, Chile · Envíos a todo Chile<br><a href="https://www.instagram.com/niebla_coffee/" target="_blank" rel="noopener">@niebla_coffee</a></p>
     </nav>
   </div>
 
   <main>
-    <!-- I · PORTADA -->
+    <!-- PORTADA -->
     <section id="portada" class="hero">
       <div class="hero__inner">
         <div class="hero__medallion reveal">
@@ -124,39 +124,180 @@
           <li>Envíos a todo Chile</li>
         </ul>
       </div>
-      <a href="#nosotros" class="hero__scroll" aria-label="Seguir bajando"><span></span></a>
+      <a href="#capitulos" class="hero__scroll" aria-label="Seguir bajando"><span></span></a>
     </section>
 
-    <!-- II · NOSOTROS (textos reales de Niebla: historias "Nosotros" de Instagram) -->
-    <section id="nosotros" class="section story">
-      <div class="wrap story__grid">
-        <header class="section__head reveal">
-          <img class="emblem emblem--hat" src="assets/emblema-sombrero.webp" alt="" width="360" height="327" loading="lazy" decoding="async">
-          <p class="kicker">Capítulo I · Nosotros</p>
-          <h2>Detrás de la niebla</h2>
+    <!-- CAPÍTULOS: índice seleccionable. El contenido completo queda en el DOM (SEO); se despliega al tocar. -->
+    <section id="capitulos" class="section chapters" aria-labelledby="capitulos-title">
+      <div class="wrap">
+        <header class="section__head section__head--center reveal">
+          <p class="kicker">Índice del grimorio</p>
+          <h2 id="capitulos-title">Capítulos</h2>
+          <p class="section__sub">La magia solo la ven aquellos que se detienen a observar.</p>
         </header>
-        <div class="story__text reveal">
-          <h3 class="story__label">¿Quiénes somos?</h3>
-          <p class="lead">Somos una sociedad de buscadores.</p>
-          <p>Personas que alguna vez probaron el café de Niebla y sintieron que algo cambió. No nos definimos por títulos ni etiquetas, sino por la inquietud que nos une. Somos lectores, pensadores, creadores, observadores. Nos inspira la alquimia del conocimiento, pero con los pies en la tierra: trabajamos con productores comprometidos, tostamos con precisión, y servimos con intención. Niebla no es solo un lugar, es una forma de ver.</p>
+        <div class="chapters__list reveal">
+        <article class="chapter" id="nosotros">
+          <h3 class="chapter__h">
+            <button class="chapter__toggle" type="button" id="nosotros-tab" aria-expanded="false" aria-controls="nosotros-body">
+              <span class="chapter__seal" aria-hidden="true"><span>I</span></span>
+              <span class="chapter__txt">
+                <span class="chapter__title">Nosotros <span class="chapter__dot">·</span> Misión y Visión</span>
+                <span class="chapter__teaser">Una sociedad de buscadores: quiénes somos, qué buscamos y hacia dónde vamos.</span>
+              </span>
+              <span class="chapter__chev" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="chapter__body" id="nosotros-body" role="region" aria-labelledby="nosotros-tab">
+            <div class="chapter__clip">
+              <div class="chapter__mist" aria-hidden="true"></div>
+              <div class="chapter__content story story__grid">
+            <header class="section__head">
+              <img class="emblem emblem--hat" src="assets/emblema-sombrero.webp" alt="" width="360" height="327" loading="lazy" decoding="async">
+              <h4 class="chapter__display">Detrás de la niebla</h4>
+            </header>
+            <div class="story__text">
+              <h3 class="story__label">¿Quiénes somos?</h3>
+              <p class="lead">Somos una sociedad de buscadores.</p>
+              <p>Personas que alguna vez probaron el café de Niebla y sintieron que algo cambió. No nos definimos por títulos ni etiquetas, sino por la inquietud que nos une. Somos lectores, pensadores, creadores, observadores. Nos inspira la alquimia del conocimiento, pero con los pies en la tierra: trabajamos con productores comprometidos, tostamos con precisión, y servimos con intención. Niebla no es solo un lugar, es una forma de ver.</p>
+            </div>
+            <ul class="story__pillars story__pillars--two">
+              <li class="card"><span class="pillar__n">i</span><h3>Misión</h3><p>En Niebla, buscamos cultivar momentos de pausa y profundidad. Nuestra misión es ofrecer café que inspire conversación, reflexión y descubrimiento. Cada taza es una invitación a explorar lo invisible: lo que se piensa, lo que se siente, lo que se transforma. Trabajamos con respeto por el origen, atención al detalle y una curiosidad constante por lo que aún no sabemos.</p></li>
+              <li class="card"><span class="pillar__n">ii</span><h3>Visión</h3><p>Queremos ser un punto de encuentro para quienes valoran el conocimiento, la sensibilidad y la búsqueda. En Niebla, el café no es solo bebida: es lenguaje, es ritual, es herramienta. Imaginamos una comunidad que crece a través del intercambio, donde cada persona que ha probado nuestro café se convierte en parte de una red silenciosa pero vibrante. Una sociedad que evoluciona con cada conversación, cada idea compartida, cada taza servida.</p></li>
+            </ul>
+
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="chapter" id="aprende">
+          <h3 class="chapter__h">
+            <button class="chapter__toggle" type="button" id="aprende-tab" aria-expanded="false" aria-controls="aprende-body">
+              <span class="chapter__seal" aria-hidden="true"><span>II</span></span>
+              <span class="chapter__txt">
+                <span class="chapter__title">Aprende</span>
+                <span class="chapter__teaser">Pequeño grimorio del café: grano o molido, y cómo leer la fecha de tostado.</span>
+              </span>
+              <span class="chapter__chev" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="chapter__body" id="aprende-body" role="region" aria-labelledby="aprende-tab">
+            <div class="chapter__clip">
+              <div class="chapter__mist" aria-hidden="true"></div>
+              <div class="chapter__content learn">
+            <header class="section__head section__head--center">
+              <h4 class="chapter__display">Pequeño grimorio del café</h4>
+              <p class="section__sub">Lo justo para elegir mejor y preparar con intención.</p>
+            </header>
+
+            <div class="learn__grid">
+              <article class="card learn__card">
+                <p class="learn__tag">Grano o molido</p>
+                <h3>El aroma vive en el grano</h3>
+                <p>Molido, el café pierde aromas en días. Si tienes molino, compra en grano y muele justo antes. Si no, te lo molemos según tu método.</p>
+              </article>
+              <article class="card learn__card learn__card--date">
+                <p class="learn__tag">Cómo leer la fecha de tostado</p>
+                <h3>El café también necesita reposar</h3>
+                <ol class="timeline">
+                  <li><strong>Días 0–4</strong><span>Recién salido del tambor. Libera CO₂; espera un poco.</span></li>
+                  <li><strong>Días 5–30</strong><span>Punto mágico: aromas y dulzor en su mejor momento.</span></li>
+                  <li><strong>30–60 días</strong><span>Sigue rico, pero se va apagando. Guárdalo cerrado, lejos de luz y calor.</span></li>
+                </ol>
+                <p class="learn__foot">Por eso cada bolsa de Niebla lleva escrita su fecha de tostado, no solo una fecha de vencimiento.</p>
+              </article>
+            </div>
+
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="chapter" id="misiones">
+          <h3 class="chapter__h">
+            <button class="chapter__toggle" type="button" id="misiones-tab" aria-expanded="false" aria-controls="misiones-body">
+              <span class="chapter__seal" aria-hidden="true"><span>III</span></span>
+              <span class="chapter__txt">
+                <span class="chapter__title">Misiones</span>
+                <span class="chapter__teaser">En búsqueda de los sellos perdidos, y talleres de filtrados y espresso.</span>
+              </span>
+              <span class="chapter__chev" aria-hidden="true"></span>
+            </button>
+          </h3>
+          <div class="chapter__body" id="misiones-body" role="region" aria-labelledby="misiones-tab">
+            <div class="chapter__clip">
+              <div class="chapter__mist" aria-hidden="true"></div>
+              <div class="chapter__content missions">
+            <header class="section__head section__head--center">
+              <h4 class="chapter__display">En búsqueda de los sellos perdidos</h4>
+              <p class="section__sub">Brujos y brujas de Niebla: una nueva misión ha comenzado.</p>
+            </header>
+            <p class="quest__intro">Cada bolsa de 250 g guarda un secreto perteneciente a la orden. Dos pruebas, dos recompensas:</p>
+            <div class="missions__grid quest__grid">
+              <article class="card mission quest">
+                <p class="learn__tag">Primera prueba</p>
+                <h3>Las tarjetas de Niebla</h3>
+                <p>Reúne cinco tarjetas de Niebla y obtén un 10% de descuento en tu próxima compra.</p>
+                <p class="mission__price"><span>5 tarjetas</span> = 10% de descuento</p>
+              </article>
+              <article class="card mission quest">
+                <p class="learn__tag">Segunda prueba</p>
+                <h3>Los sellos de lacre</h3>
+                <p>Reúne diez sellos de lacre y canjéalos por un café de 100 g seleccionado al azar por el brujo tostador.</p>
+                <p class="mission__price"><span>10 sellos</span> = 1 café de 100 g</p>
+              </article>
+            </div>
+            <p class="quest__foot">El destino decidirá qué origen llega a tus manos: Colombia, Brasil, Bolivia u otros cafés ocultos dentro de nuestra colección. Cada tarjeta y cada sello son prueba de tu recorrido dentro de la sociedad secreta del café. <em>La búsqueda ya comenzó.</em></p>
+
+            <header class="section__head section__head--center missions__sub">
+              <p class="kicker">Talleres</p>
+              <h4 class="chapter__display">Talleres para aprendices</h4>
+              <p class="section__sub">Jornadas prácticas para entender el café más allá de una receta.</p>
+            </header>
+            <div class="missions__grid">
+              <article class="card mission">
+                <p class="learn__tag">Atelier</p>
+                <h3>Taller de Filtrados</h3>
+                <p>Extracción y TDS, calibración de recetas, agua, percolación e inmersión, y cómo conservar tu café.</p>
+                <p class="mission__price"><span>$60.000</span> por alumno</p>
+              </article>
+              <article class="card mission">
+                <p class="learn__tag">Atelier</p>
+                <h3>Atelier de Espresso</h3>
+                <p>Uso de la máquina, fundamentos de extracción, distribución y tampeo, y cómo calibrar un café desde cero.</p>
+                <p class="mission__price"><span>$80.000</span> por alumno</p>
+              </article>
+            </div>
+            <p class="missions__cta"><a class="btn btn--ghost" href="#contacto">Consultar talleres</a></p>
+
+              </div>
+            </div>
+          </div>
+        </article>
         </div>
-        <ul class="story__pillars story__pillars--two">
-          <li class="card reveal"><span class="pillar__n">i</span><h3>Misión</h3><p>En Niebla, buscamos cultivar momentos de pausa y profundidad. Nuestra misión es ofrecer café que inspire conversación, reflexión y descubrimiento. Cada taza es una invitación a explorar lo invisible: lo que se piensa, lo que se siente, lo que se transforma. Trabajamos con respeto por el origen, atención al detalle y una curiosidad constante por lo que aún no sabemos.</p></li>
-          <li class="card reveal"><span class="pillar__n">ii</span><h3>Visión</h3><p>Queremos ser un punto de encuentro para quienes valoran el conocimiento, la sensibilidad y la búsqueda. En Niebla, el café no es solo bebida: es lenguaje, es ritual, es herramienta. Imaginamos una comunidad que crece a través del intercambio, donde cada persona que ha probado nuestro café se convierte en parte de una red silenciosa pero vibrante. Una sociedad que evoluciona con cada conversación, cada idea compartida, cada taza servida.</p></li>
-        </ul>
       </div>
     </section>
 
-    <!-- III · CAFÉ DISPONIBLE -->
+    <!-- CAFÉ DISPONIBLE (Niebla Orígenes): siempre visible -->
     <section id="cafe" class="section shop">
       <div class="wrap">
         <header class="section__head section__head--center reveal">
           <img class="emblem emblem--book" src="assets/emblema-libro.webp" alt="" width="360" height="337" loading="lazy" decoding="async">
-          <p class="kicker">Capítulo II · Café disponible</p>
+          <p class="kicker">Café disponible</p>
           <h2>Niebla Orígenes</h2>
           <p class="section__sub">El café elige al barista</p>
           <p class="section__note">Orígenes que rotan según temporada, cada uno con su etiqueta y su fecha de tostado a la vista.</p>
         </header>
+        <div class="card roast-intro reveal">
+          <div class="roast-intro__main">
+            <p class="learn__tag">Cómo tostamos</p>
+            <h3>Un solo tueste por origen: omniroast</h3>
+            <p>Tostamos en lotes pequeños y cada origen pasa por el tambor una sola vez, con un único perfil <strong>omniroast</strong>: versátil para filtrado y para espresso. No hacemos un tueste distinto para cada método: complica el tostado y tiende a sobredesarrollar el café, apagando lo que el origen tiene para decir.</p>
+            <ul class="omni__uses" aria-label="Sirve para"><li>Filtrado</li><li>Espresso</li></ul>
+          </div>
+          <div class="roast-intro__side">
+            <p class="learn__tag">Fecha de tostado y reposo</p>
+            <p>Cada bolsa lleva escrita su fecha de tostado. Los primeros días el café libera CO₂: déjalo reposar. Su punto mágico va de los 5 a los 30 días desde el tueste.</p>
+          </div>
+        </div>
         <div id="products" class="products" aria-live="polite">
           <p class="products__loading">Invocando el catálogo…</p>
         </div>
@@ -164,94 +305,10 @@
       </div>
     </section>
 
-    <!-- IV · APRENDE -->
-    <section id="aprende" class="section learn">
-      <div class="wrap">
-        <header class="section__head section__head--center reveal">
-          <p class="kicker">Capítulo III · Aprende</p>
-          <h2>Pequeño grimorio del café</h2>
-          <p class="section__sub">Lo justo para elegir mejor y preparar con intención.</p>
-        </header>
-
-        <div class="learn__grid">
-          <article class="card learn__card learn__card--omni reveal">
-            <p class="learn__tag">Nuestro tueste · Omniroast</p>
-            <h3>Un solo tueste para todos los rituales</h3>
-            <p>En Niebla cada origen pasa por el tambor una sola vez, con un perfil <strong>omniroast</strong>: pensado para brillar tanto en filtrado como en espresso.</p>
-            <p>No separamos tuestes para espresso y para filtro. Complica el tostado y tiende a sobredesarrollar el café, apagando lo que el origen tiene para decir. Un mismo grano, preparado con intención, sirve para la V60 de la mañana y para el espresso de la tarde.</p>
-            <ul class="omni__uses" aria-label="Sirve para"><li>Filtrado</li><li>Espresso</li></ul>
-          </article>
-          <article class="card learn__card reveal">
-            <p class="learn__tag">Grano o molido</p>
-            <h3>El aroma vive en el grano</h3>
-            <p>Molido, el café pierde aromas en días. Si tienes molino, compra en grano y muele justo antes. Si no, te lo molemos según tu método.</p>
-          </article>
-          <article class="card learn__card learn__card--wide reveal">
-            <p class="learn__tag">Cómo leer la fecha de tostado</p>
-            <h3>El café también necesita reposar</h3>
-            <ol class="timeline">
-              <li><strong>Días 0–4</strong><span>Recién salido del tambor. Libera CO₂; espera un poco.</span></li>
-              <li><strong>Días 5–30</strong><span>Punto mágico: aromas y dulzor en su mejor momento.</span></li>
-              <li><strong>30–60 días</strong><span>Sigue rico, pero se va apagando. Guárdalo cerrado, lejos de luz y calor.</span></li>
-            </ol>
-            <p class="learn__foot">Por eso cada bolsa de Niebla lleva escrita su fecha de tostado, no solo una fecha de vencimiento.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- V · MISIONES / TALLERES -->
-    <section id="misiones" class="section missions">
-      <div class="wrap">
-        <header class="section__head section__head--center reveal">
-          <p class="kicker">Capítulo IV · Misiones</p>
-          <h2>En búsqueda de los sellos perdidos</h2>
-          <p class="section__sub">Brujos y brujas de Niebla: una nueva misión ha comenzado.</p>
-        </header>
-        <p class="quest__intro reveal">Cada bolsa de 250 g guarda un secreto perteneciente a la orden. Dos pruebas, dos recompensas:</p>
-        <div class="missions__grid quest__grid">
-          <article class="card mission quest reveal">
-            <p class="learn__tag">Primera prueba</p>
-            <h3>Las tarjetas de Niebla</h3>
-            <p>Reúne cinco tarjetas de Niebla y obtén un 10% de descuento en tu próxima compra.</p>
-            <p class="mission__price"><span>5 tarjetas</span> = 10% de descuento</p>
-          </article>
-          <article class="card mission quest reveal">
-            <p class="learn__tag">Segunda prueba</p>
-            <h3>Los sellos de lacre</h3>
-            <p>Reúne diez sellos de lacre y canjéalos por un café de 100 g seleccionado al azar por el brujo tostador.</p>
-            <p class="mission__price"><span>10 sellos</span> = 1 café de 100 g</p>
-          </article>
-        </div>
-        <p class="quest__foot reveal">El destino decidirá qué origen llega a tus manos: Colombia, Brasil, Bolivia u otros cafés ocultos dentro de nuestra colección. Cada tarjeta y cada sello son prueba de tu recorrido dentro de la sociedad secreta del café. <em>La búsqueda ya comenzó.</em></p>
-
-        <header class="section__head section__head--center missions__sub reveal">
-          <p class="kicker">Talleres</p>
-          <h2>Talleres para aprendices</h2>
-          <p class="section__sub">Jornadas prácticas para entender el café más allá de una receta.</p>
-        </header>
-        <div class="missions__grid">
-          <article class="card mission reveal">
-            <p class="learn__tag">Atelier</p>
-            <h3>Taller de Filtrados</h3>
-            <p>Extracción y TDS, calibración de recetas, agua, percolación e inmersión, y cómo conservar tu café.</p>
-            <p class="mission__price"><span>$60.000</span> por alumno</p>
-          </article>
-          <article class="card mission reveal">
-            <p class="learn__tag">Atelier</p>
-            <h3>Atelier de Espresso</h3>
-            <p>Uso de la máquina, fundamentos de extracción, distribución y tampeo, y cómo calibrar un café desde cero.</p>
-            <p class="mission__price"><span>$80.000</span> por alumno</p>
-          </article>
-        </div>
-        <p class="missions__cta reveal"><a class="btn btn--ghost" href="#contacto">Consultar talleres</a></p>
-      </div>
-    </section>
-
-    <!-- VI · CONTACTO -->
+    <!-- CONTACTO: siempre visible -->
     <section id="contacto" class="section contact">
       <div class="wrap contact__inner reveal">
-        <p class="kicker">Capítulo V · Contacto</p>
+        <p class="kicker">Contacto</p>
         <h2>Envía un cuervo<br><em>(o un WhatsApp)</em></h2>
         <ul class="contact__list">
           <li><span class="contact__label">Taller</span>Machalí, Región de O'Higgins, Chile</li>

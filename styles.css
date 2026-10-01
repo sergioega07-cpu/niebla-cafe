@@ -483,4 +483,138 @@ main section[tabindex="-1"]:focus { outline: none; }
 .learn__card--omni strong { color: var(--parchment); font-weight: 500; }
 .omni__uses { display: flex; flex-wrap: wrap; gap: .5rem; list-style: none; padding: 0; margin: 1.1rem 0 0; }
 .omni__uses li { font: italic 500 1.05rem/1 var(--f-accent); padding: .4rem .9rem; border-radius: 999px; color: var(--gold); border: 1px solid rgba(224, 168, 64, .35); background: rgba(224, 168, 64, .06); box-shadow: 0 0 18px -6px rgba(224, 168, 64, .35); }
-@media (min-width: 900px) { .learn__grid { grid-template-columns: 1.5fr 1fr; } }
+@media (min-width: 900px) { .learn__grid { grid-template-columns: 1fr 2fr; } }
+
+/* Nav: "Nosotros · Misión y Visión" en dos líneas compactas */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.nav__links { align-items: center; }
+.nav__stack { display: inline-flex; flex-direction: column; align-items: center; gap: .28rem; white-space: nowrap; }
+.nav__stack small { font: 400 .54rem/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-faint); transition: color .3s; }
+.nav__stack:hover small, .nav__stack.is-active small { color: rgba(224, 168, 64, .75); }
+.nav__links a { white-space: nowrap; }
+.menu__sub { display: block; margin-top: .35rem; font: italic 500 1.02rem/1.1 var(--f-accent); letter-spacing: .02em; text-transform: none; color: var(--ink-soft); }
+.menu__list a.is-active .menu__sub { color: rgba(224, 168, 64, .8); }
+.menu__list a.is-active .menu__t::after { display: none; }
+.menu__list a { position: relative; padding-right: 1.6rem; }
+.menu__list a.is-active::after { content: ""; position: absolute; right: .4rem; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+
+/* ==========================================================================
+   Capítulos seleccionables: el contenido emerge de la niebla
+   ========================================================================== */
+.chapters__list { display: grid; gap: 1rem; max-width: 1040px; margin-inline: auto; }
+.chapter {
+  position: relative; border-radius: var(--radius); overflow: hidden; isolation: isolate;
+  background: linear-gradient(180deg, rgba(26, 18, 14, .78), rgba(14, 10, 8, .84));
+  box-shadow: var(--glow);
+  transition: box-shadow .7s var(--ease), transform .7s var(--ease), opacity .9s var(--ease), translate .9s var(--ease);
+}
+/* niebla que deriva sobre la tarjeta al pasar o enfocar */
+.chapter::before {
+  content: ""; position: absolute; inset: -20% -30%; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(40% 60% at 30% 50%, rgba(216, 205, 180, .07), transparent 70%),
+    radial-gradient(35% 55% at 70% 40%, rgba(167, 90, 43, .08), transparent 70%);
+  opacity: 0; transform: translate3d(-6%, 0, 0);
+  transition: opacity .9s var(--ease), transform 2.4s var(--ease);
+}
+.chapter:hover, .chapter:focus-within { box-shadow: var(--glow-hover); }
+.chapter:hover:not(.is-open), .chapter:has(.chapter__toggle:focus-visible):not(.is-open) { transform: translateY(-2px); }
+.chapter:hover::before, .chapter:focus-within::before { opacity: 1; transform: translate3d(6%, 0, 0); }
+.chapter.is-open { box-shadow: 0 0 0 1px rgba(224, 168, 64, .16), 0 30px 70px -30px rgba(0, 0, 0, .9), 0 14px 70px -20px rgba(167, 90, 43, .35); }
+
+.chapter__h { margin: 0; font: inherit; }
+.chapter__toggle {
+  width: 100%; display: flex; align-items: center; gap: clamp(.9rem, 3vw, 1.5rem);
+  padding: clamp(1.1rem, 3vw, 1.5rem) clamp(1.1rem, 3vw, 1.8rem);
+  background: none; border: 0; border-radius: var(--radius); text-align: left; cursor: pointer; color: inherit;
+}
+.chapter__toggle:focus-visible { outline-offset: -3px; }
+.chapter__txt { flex: 1; min-width: 0; display: grid; gap: .35rem; }
+.chapter__title { font: 500 clamp(1.15rem, 3.4vw, 1.55rem)/1.2 var(--f-title); letter-spacing: .05em; color: #F2E7CF; transition: color .5s, text-shadow .5s; }
+.chapter__dot { color: var(--gold); opacity: .7; }
+.chapter__teaser { font: italic 400 clamp(1rem, 2.6vw, 1.12rem)/1.35 var(--f-accent); color: var(--ink-soft); }
+.chapter.is-open .chapter__title, .chapter__toggle:hover .chapter__title { color: #fff; text-shadow: 0 0 24px rgba(224, 168, 64, .25); }
+
+/* Sello con el número del capítulo */
+.chapter__seal {
+  position: relative; flex: none; width: clamp(48px, 9vw, 58px); aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center;
+  font: italic 500 clamp(1.15rem, 3vw, 1.35rem)/1 var(--f-accent); color: var(--gold);
+  border: 1px solid rgba(224, 168, 64, .35);
+  background: radial-gradient(circle at 50% 40%, rgba(224, 168, 64, .1), rgba(8, 6, 5, .4) 70%);
+  box-shadow: inset 0 0 0 4px rgba(8, 6, 5, .6), inset 0 0 0 5px rgba(216, 199, 161, .12);
+  transition: box-shadow .8s var(--ease), border-color .8s, color .8s;
+}
+.chapter.is-open .chapter__seal { border-color: rgba(224, 168, 64, .75); color: #f6d48d; box-shadow: inset 0 0 0 4px rgba(8, 6, 5, .6), inset 0 0 0 5px rgba(224, 168, 64, .3), 0 0 26px rgba(224, 168, 64, .35); }
+/* halo que se expande y destellos (solo al abrir) */
+.chapter__seal::after, .chapter__seal::before { content: ""; position: absolute; pointer-events: none; opacity: 0; }
+.chapter__seal::after { inset: -1px; border-radius: 50%; border: 1px solid rgba(240, 196, 110, .8); }
+.chapter__seal::before {
+  left: 50%; top: 50%; width: 3px; height: 3px; margin: -1.5px; border-radius: 50%; background: #ffe2a3;
+  box-shadow: 18px -22px 0 0 rgba(255, 226, 163, .9), -24px -12px 0 -.5px rgba(255, 226, 163, .7), 26px 10px 0 -.5px rgba(255, 226, 163, .6),
+              -14px 24px 0 -.5px rgba(255, 226, 163, .7), 4px -30px 0 -1px rgba(255, 226, 163, .5), -30px 6px 0 -1px rgba(255, 226, 163, .5);
+}
+.chapter.is-opening .chapter__seal::after { animation: sealHalo .9s var(--ease) both; }
+.chapter.is-opening .chapter__seal::before { animation: sealSparks 1s var(--ease) .05s both; }
+@keyframes sealHalo { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.9); } }
+@keyframes sealSparks { 0% { opacity: 0; transform: scale(.4) rotate(0); } 35% { opacity: 1; } 100% { opacity: 0; transform: scale(1.35) rotate(35deg); } }
+
+/* Chevron */
+.chapter__chev { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(216, 199, 161, .2); position: relative; transition: transform .8s var(--ease), border-color .5s; }
+.chapter__chev::before { content: ""; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; border-right: 1.5px solid var(--parchment); border-bottom: 1.5px solid var(--parchment); transform: translate(-50%, -70%) rotate(45deg); }
+.chapter.is-open .chapter__chev { transform: rotate(180deg); border-color: rgba(224, 168, 64, .5); }
+
+/* Cuerpo: altura fluida (0fr → 1fr) y contenido que pasa de la niebla a nítido */
+.chapter__body { display: grid; grid-template-rows: 1fr; }
+.js .chapter__body { grid-template-rows: 0fr; transition: grid-template-rows .85s var(--ease) .08s; }
+.js .chapter.is-open .chapter__body { grid-template-rows: 1fr; transition-delay: 0s; }
+.chapter__clip { position: relative; min-height: 0; overflow: hidden; }
+.chapter__content { padding: .4rem clamp(1.1rem, 3vw, 1.8rem) clamp(1.6rem, 4vw, 2.4rem); }
+.js .chapter__content {
+  opacity: 0; filter: blur(8px); transform: translate3d(0, 14px, 0);
+  transition: opacity .45s ease, filter .5s ease, transform .5s var(--ease);
+}
+.js .chapter.is-open .chapter__content {
+  opacity: 1; filter: none; transform: none;
+  transition: opacity .8s var(--ease) .12s, filter .9s var(--ease) .1s, transform .9s var(--ease) .1s;
+}
+/* Velo de niebla que barre y se disipa al abrir; vuelve a cubrir al cerrar */
+.chapter__mist {
+  position: absolute; inset: 0 -40%; z-index: 2; pointer-events: none; opacity: 0;
+  background:
+    radial-gradient(30% 45% at 25% 30%, rgba(222, 212, 190, .16), transparent 70%),
+    radial-gradient(35% 50% at 55% 60%, rgba(222, 212, 190, .12), transparent 72%),
+    radial-gradient(28% 40% at 80% 25%, rgba(224, 168, 64, .07), transparent 70%),
+    linear-gradient(90deg, transparent, rgba(200, 190, 170, .06) 40%, rgba(200, 190, 170, .06) 60%, transparent);
+}
+.chapter.is-opening .chapter__mist { animation: mistClear 1.1s var(--ease) both; }
+.chapter.is-closing .chapter__mist { animation: mistGather .7s ease both; }
+@keyframes mistClear { 0% { opacity: 1; transform: translate3d(-12%, 0, 0) scale(1.05); } 100% { opacity: 0; transform: translate3d(14%, 0, 0) scale(1.15); } }
+@keyframes mistGather { 0% { opacity: 0; transform: translate3d(10%, 0, 0); } 100% { opacity: .9; transform: translate3d(0, 0, 0); } }
+
+/* Contenido de cada capítulo (antes eran secciones) */
+.chapter__display { font: 500 clamp(1.6rem, 3.6vw, 2.4rem)/1.15 var(--f-title); letter-spacing: .04em; margin: 0; color: #F2E7CF; text-wrap: balance; }
+.chapter__content .section__head { margin-bottom: clamp(1.4rem, 3vw, 2.2rem); }
+.chapter__content.story__grid { gap: 1.2rem 3rem; }
+.chapter__content .story__pillars { margin-top: .6rem; }
+.chapter__content .missions__sub { margin-top: clamp(2.5rem, 6vw, 4rem); }
+.chapter__content .quest__intro { margin-top: 0; }
+
+/* Cómo tostamos (antes del catálogo) */
+.roast-intro { display: grid; gap: 1.4rem 3rem; padding: clamp(1.4rem, 3.5vw, 2.2rem); margin: 0 auto clamp(2rem, 5vw, 3rem); max-width: 1040px; }
+.roast-intro h3 { font-size: clamp(1.25rem, 3vw, 1.6rem); margin-bottom: .8rem; }
+.roast-intro p { color: var(--ink-soft); margin: 0 0 .7rem; }
+.roast-intro strong { color: var(--parchment); font-weight: 500; }
+.roast-intro__side { padding-top: 1.2rem; border-top: 1px solid var(--line); }
+@media (min-width: 900px) {
+  .roast-intro { grid-template-columns: 1.6fr 1fr; align-items: start; }
+  .roast-intro__side { padding: 0 0 0 2rem; border-top: 0; border-left: 1px solid var(--line); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter, .chapter::before, .chapter__chev, .chapter__seal, .chapter__title { transition: none !important; }
+  .chapter:hover, .chapter:focus-within { transform: none !important; }
+  .js .chapter__body, .js .chapter.is-open .chapter__body { transition: none !important; }
+  .js .chapter__content, .js .chapter.is-open .chapter__content { transition: none !important; filter: none !important; transform: none !important; }
+  .chapter__mist, .chapter__seal::before, .chapter__seal::after { animation: none !important; display: none; }
+}

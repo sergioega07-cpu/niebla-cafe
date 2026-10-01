@@ -468,8 +468,38 @@
   // Si la pantalla pasa a escritorio con el menú abierto, se cierra (el panel se oculta en CSS)
   window.matchMedia("(min-width: 900px)").addEventListener("change", (mq) => { if (mq.matches && menuIsOpen()) closeMenu({ restoreFocus: false }); });
 
+  /* ---------- Capítulos seleccionables (acordeón; varios pueden estar abiertos) ---------- */
+  const chapters = $$(".chapter");
+  function setChapter(ch, open, { animate = true } = {}) {
+    if (!ch || open === ch.classList.contains("is-open")) return;
+    const btn = $(".chapter__toggle", ch), body = $(".chapter__body", ch);
+    btn.setAttribute("aria-expanded", String(open));
+    if (open) body.removeAttribute("inert"); else body.setAttribute("inert", "");
+    ch.classList.remove("is-opening", "is-closing");
+    void ch.offsetWidth; // reinicia la animación de niebla
+    ch.classList.toggle("is-open", open);
+    if (animate && !reduceMotion) {
+      ch.classList.add(open ? "is-opening" : "is-closing");
+      clearTimeout(ch._mistT);
+      ch._mistT = setTimeout(() => ch.classList.remove("is-opening", "is-closing"), 1200);
+    }
+  }
+  chapters.forEach((ch) => {
+    $(".chapter__body", ch).setAttribute("inert", ""); // cerrado: no se enfoca, pero sigue en el DOM (SEO)
+    $(".chapter__toggle", ch).addEventListener("click", () => setChapter(ch, !ch.classList.contains("is-open")));
+  });
+  const chapterFor = (hash) => { const el = hash && hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null; return el?.closest(".chapter") || null; };
+  // Cualquier enlace a un capítulo (menú, panel, portada) lo abre además de desplazarse
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]'); if (!a) return;
+    const ch = chapterFor(a.getAttribute("href")); if (ch) setChapter(ch, true);
+  });
+  const openFromHash = () => { const ch = chapterFor(location.hash); if (ch) { setChapter(ch, true, { animate: false }); } };
+  openFromHash();
+  window.addEventListener("hashchange", () => { const ch = chapterFor(location.hash); if (ch) setChapter(ch, true); });
+
   /* ---------- Sección activa en la navegación (desktop + panel) ---------- */
-  const NAV_IDS = ["nosotros", "cafe", "aprende", "misiones", "contacto"];
+  const NAV_IDS = ["nosotros", "aprende", "misiones", "cafe", "contacto"]; // mismo orden que en la página
   const navLinks = $$("[data-nav]");
   let activeId = "";
   function setActive(id) {
@@ -481,21 +511,25 @@
       if (on) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current");
     });
   }
-  const visibleSections = new Set();
+  const LINE = 0.3; // línea de lectura: 30% desde arriba
+  const inBand = new Set();
   const atBottom = () => innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
   function pickActive() {
-    // Al final de la página, Contacto (es corta y puede no cruzar la franja central)
-    if (atBottom()) return setActive("contacto");
-    const id = NAV_IDS.filter((i) => visibleSections.has(i)).pop();
-    setActive(id || "");
+    if (atBottom()) return setActive("contacto"); // Contacto es corta: al final de la página
+    const id = NAV_IDS.filter((i) => inBand.has(i)).pop();
+    if (id) return setActive(id);
+    // Entre tarjetas se mantiene la anterior; sobre la portada no se marca nada
+    const first = document.getElementById(NAV_IDS[0]);
+    if (first && first.getBoundingClientRect().top > innerHeight * LINE) setActive("");
   }
   if ("IntersectionObserver" in window) {
     const navIO = new IntersectionObserver((entries) => {
-      entries.forEach((en) => (en.isIntersecting ? visibleSections.add(en.target.id) : visibleSections.delete(en.target.id)));
+      entries.forEach((en) => (en.isIntersecting ? inBand.add(en.target.id) : inBand.delete(en.target.id)));
       pickActive();
-    }, { rootMargin: "-40% 0px -55% 0px", threshold: 0 }); // franja cerca del centro de la pantalla
+    }, { rootMargin: `-${LINE * 100}% 0px -${100 - LINE * 100 - 1}% 0px`, threshold: 0 });
     NAV_IDS.forEach((id) => { const el = document.getElementById(id); if (el) navIO.observe(el); });
-    window.addEventListener("scroll", () => { if (atBottom() || activeId === "contacto") pickActive(); }, { passive: true });
+    let raf = 0;
+    window.addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; pickActive(); }); }, { passive: true });
   }
 
   // Toast
@@ -559,6 +593,9 @@
   const nav = $("#nav");
   const onScroll = () => nav.classList.toggle("is-scrolled", window.scrollY > 40);
   window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+  // Los anclajes quedan justo bajo el encabezado fijo (que baja 28 px si se ve el aviso "Datos de ejemplo")
+  const syncScrollPad = () => { document.documentElement.style.scrollPaddingTop = Math.round(nav.getBoundingClientRect().bottom + 14) + "px"; };
+  syncScrollPad(); window.addEventListener("resize", syncScrollPad, { passive: true });
 
   /* ---------- Niebla animada (canvas liviano, baja resolución) ---------- */
   function fog() {
@@ -622,6 +659,7 @@
     .then(({ prods, demo }) => {
       PRODUCTS = prods;
       $("#dev-banner").hidden = !demo;
+      syncScrollPad();
       renderProducts();
       reconcileCart(); renderCart();
       injectProductLD(prods);
