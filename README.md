@@ -1,7 +1,7 @@
 # Niebla — Tostaduría mágica
 
 Sitio catálogo de **Niebla**, tostaduría de café de especialidad en Machalí, Chile.
-Muestra el café disponible (con fecha de tostado y stock), contenidos educativos y talleres.
+Muestra el café disponible (con precio por formato y stock), contenidos educativos y talleres.
 No tiene pago en línea: el carrito arma el pedido y lo envía por **WhatsApp** a Niebla, donde se cierra la venta.
 
 Sitio estático (HTML, CSS y JS sin build), publicado con GitHub Pages:
@@ -20,9 +20,9 @@ https://sergioega07-cpu.github.io/niebla-cafe/
    `id,nombre,categoria,origen,proceso,tueste,notas_sabor,fecha_tostado,formato,molienda,precio_clp,stock,descripcion,imagen_url,visible,altura,variedad`
    - Una fila por café **y** formato (ej.: una fila para 250 g y otra para 1 kg con el mismo `id`).
    - `molienda`: opciones separadas por `|`, por ejemplo `Grano|Molido espresso|Molido filtro`.
-   - `fecha_tostado`: `AAAA-MM-DD` o `DD/MM/AAAA`. Si tiene menos de 15 días aparece "Recién tostado".
+   - `fecha_tostado`: ya no se muestra en las tarjetas (la fecha va escrita en cada bolsa). La columna se puede dejar vacía o borrar: el sitio la ignora.
    - `stock`: `0` = Agotado, `1–3` = Últimas unidades.
-   - `precio_clp`: solo el número, sin `$` ni puntos (ej.: `11500` para 250 g y `39000` para 1 kg).
+   - `precio_clp`: solo el número, sin `$` ni puntos (ej.: `11500` para 250 g y `39000` para 1 kg; el descafeinado, `13500` y `62000`).
    - `visible`: `NO` oculta la fila.
    - `imagen_url`: etiqueta del café, por ejemplo `assets/labels/vampiros.webp` (o una URL completa).
    - `altura` y `variedad` (opcionales): por ejemplo `1350 msnm` y `Catuaí Amarillo`.
@@ -35,5 +35,6 @@ Mientras `SHEET_CSV_URL` esté vacío o falle, el sitio usa `assets/productos-ej
 
 ## Pendiente
 
-- Precios vigentes: $11.500 (250 g) y $39.000 (1 kg), ya cargados en el CSV de ejemplo; la planilla de Google debe usar los mismos en `precio_clp`.
-- Confirmar stock y fechas de tostado reales (los del CSV de ejemplo son provisorios).
+- Precios vigentes (ya cargados en el CSV de ejemplo; la planilla de Google debe usar los mismos en `precio_clp`): $11.500 (250 g) y $39.000 (1 kg); Espantapájaros Descafeinado $13.500 (250 g) y $62.000 (1 kg).
+- Café publicado: Espantapájaros, Espantapájaros Descafeinado y Vampiros.
+- Confirmar stock real (el del CSV de ejemplo es provisorio).

@@ -9,7 +9,7 @@
    - altura y variedad son opcionales (ej: "1400 msnm", "Parainema").
    - visible = NO oculta la fila.
    - molienda: opciones separadas por "|" (ej: Grano|Molido espresso|Molido filtro).
-   - fecha_tostado: AAAA-MM-DD o DD/MM/AAAA.
+   - fecha_tostado: ya no se muestra en el sitio; la columna puede quedar vacía o no existir (se ignora).
    ========================================================================== */
 (() => {
   "use strict";
@@ -21,7 +21,6 @@
   const SHEET_CSV_URL = "";
   const LOCAL_CSV_URL = "assets/productos-ejemplo.csv";
   const WA_NUMBER = "56940220026";
-  const DIAS_RECIEN_TOSTADO = 15;
   const STOCK_BAJO = 3;
   const CART_KEY = "niebla-carrito-v1";
   const NAME_KEY = "niebla-nombre-v1";
@@ -36,21 +35,7 @@
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   // encodeURIComponent + paréntesis codificados (algunas apps cortan el enlace en ")")
   const waLink = (text) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text).replace(/[()]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase())}`;
-  const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
-  function parseDate(str) {
-    const s = String(str || "").trim();
-    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-    if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
-    m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
-    if (m) return new Date(+m[3], +m[2] - 1, +m[1]);
-    return null;
-  }
-  function daysSince(date) {
-    const t = new Date(); t.setHours(0, 0, 0, 0);
-    return Math.round((t - date) / 86400000);
-  }
-  const fmtDate = (d) => `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;
 
   /* ---------- CSV robusto (RFC 4180: comillas, comas y saltos dentro de campos, "" escapadas) ---------- */
   function parseCSV(text) {
@@ -90,7 +75,7 @@
         map.set(r.id, {
           id: r.id, nombre: r.nombre, categoria: r.categoria, origen: r.origen, proceso: r.proceso,
           tueste: r.tueste, notas: (r.notas_sabor || "").split(/[,;·]/).map((s) => s.trim()).filter(Boolean),
-          fecha: parseDate(r.fecha_tostado), descripcion: r.descripcion, imagen: r.imagen_url,
+          descripcion: r.descripcion, imagen: r.imagen_url,
           altura: r.altura, variedad: r.variedad, formatos: [],
         });
       }
@@ -98,8 +83,6 @@
       // Si alguna fila del grupo trae más info, se completa
       for (const k of ["nombre", "categoria", "origen", "proceso", "tueste", "descripcion", "altura", "variedad"]) if (!p[k] && r[k]) p[k] = r[k];
       if (!p.imagen && r.imagen_url) p.imagen = r.imagen_url;
-      const fd = parseDate(r.fecha_tostado);
-      if (fd && (!p.fecha || fd > p.fecha)) p.fecha = fd;
       p.formatos.push({
         formato: r.formato || "Único",
         precio: toInt(r.precio_clp),
@@ -190,15 +173,6 @@
 
   function firstAvailable(p) { const i = p.formatos.findIndex((f) => f.stock > 0); return i < 0 ? 0 : i; }
 
-  function freshnessHTML(p) {
-    if (!p.fecha) return `<div class="roast-date"><div><strong>Fecha de tostado por confirmar</strong></div></div>`;
-    const d = daysSince(p.fecha);
-    const ago = d < 0 ? "Próximo tueste" : d === 0 ? "Tostado hoy" : d === 1 ? "Hace 1 día" : `Hace ${d} días`;
-    return `<div class="roast-date">
-      <svg class="roast-date__icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M12 3c2 3 4 4.5 4 8a4 4 0 0 1-8 0c0-2 1-3 1.5-4.5C10.5 8 11 9 12 9c0-2-.5-4 0-6Z M9 20h6 M12 16v4"/></svg>
-      <div><strong>Tostado el ${fmtDate(p.fecha)}</strong><span>${ago}</span></div>
-    </div>`;
-  }
   function roastDots(t) {
     const lvl = /oscur/i.test(t) ? 3 : /medi/i.test(t) ? 2 : /clar/i.test(t) ? 1 : 0;
     if (!lvl) return "";
@@ -209,7 +183,6 @@
     const sel = selection.get(p.id);
     const f = p.formatos[sel.f];
     const st = stockState(f.stock);
-    const fresh = p.fecha && daysSince(p.fecha) >= 0 && daysSince(p.fecha) < DIAS_RECIEN_TOSTADO;
     const allOut = totalStock(p) <= 0;
     const media = p.imagen
       ? `<img src="${esc(p.imagen)}" alt="Etiqueta de ${esc(p.nombre)}${p.origen ? ` · ${esc(p.origen)}` : ""}" width="520" height="800" loading="lazy" decoding="async">`
@@ -219,7 +192,6 @@
       <div class="product__media ${p.imagen ? "product__media--label" : ""}">
         ${media}
         <div class="product__badges">
-          <span>${fresh ? `<span class="badge badge--fresh">Recién tostado</span>` : ""}</span>
           <span class="badge badge--${st.key}" data-role="stock">${st.label}</span>
         </div>
       </div>
@@ -234,7 +206,6 @@
         </dl>
         ${p.notas.length ? `<ul class="notes" aria-label="Notas de sabor">${p.notas.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
         ${p.descripcion ? `<p class="product__desc">${esc(p.descripcion)}</p>` : ""}
-        ${freshnessHTML(p)}
         <div class="product__opts">
           <div>
             <span class="opt-label" id="fl-${esc(p.id)}">Formato</span>
