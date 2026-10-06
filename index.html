@@ -6,7 +6,10 @@
   <title>Niebla · Tostaduría mágica en Machalí, Chile | Café de especialidad</title>
   <meta name="description" content="Niebla es una tostaduría de café de especialidad en Machalí, Chile. Café tostado con dedicación, fecha de tostado visible, talleres de filtrados y espresso. Envíos a todo Chile.">
   <meta name="theme-color" content="#080605">
-  <link rel="icon" href="assets/logo-placeholder.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/niebla-emblema-solido.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="assets/favicon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <!-- URL pública (GitHub Pages). Si se usa dominio propio, cambiarla aquí, en og:*, JSON-LD y SITE_URL de app.js -->
   <link rel="canonical" href="https://sergioega07-cpu.github.io/niebla-cafe/">
 
@@ -17,14 +20,15 @@
   <meta property="og:title" content="Niebla · Tostaduría mágica — Café de especialidad en Machalí">
   <meta property="og:description" content="Café de especialidad tostado con dedicación en Machalí, Chile. Mira el café disponible, su fecha de tostado y pide directo por WhatsApp. Envíos a todo Chile.">
   <meta property="og:url" content="https://sergioega07-cpu.github.io/niebla-cafe/">
-  <meta property="og:image" content="https://sergioega07-cpu.github.io/niebla-cafe/assets/og-niebla.png">
+  <meta property="og:image" content="https://sergioega07-cpu.github.io/niebla-cafe/assets/og-niebla.png?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/fonts/amarante.woff2" as="font" type="font/woff2" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script>document.documentElement.classList.add("js")</script>
 
@@ -37,7 +41,7 @@
     "alternateName": "Niebla Roasters",
     "description": "Tostaduría de café de especialidad en Machalí, Chile. Tostado con dedicación. Envíos a todo Chile.",
     "url": "https://sergioega07-cpu.github.io/niebla-cafe/",
-    "logo": "https://sergioega07-cpu.github.io/niebla-cafe/assets/logo-placeholder.svg",
+    "logo": "https://sergioega07-cpu.github.io/niebla-cafe/assets/niebla-emblema-solido.png",
     "image": "https://sergioega07-cpu.github.io/niebla-cafe/assets/og-niebla.png",
     "telephone": "+56940220026",
     "servesCuisine": "Café de especialidad",
@@ -66,7 +70,7 @@
 
   <header class="nav" id="nav">
     <a href="#portada" class="nav__brand" aria-label="Niebla, ir al inicio">
-      <img src="assets/logo-placeholder.svg" alt="" width="34" height="34">
+      <img src="assets/niebla-emblema.svg" alt="" width="34" height="36">
       <span>Niebla</span>
     </a>
     <nav class="nav__links" aria-label="Secciones">
@@ -108,8 +112,7 @@
     <section id="portada" class="hero">
       <div class="hero__inner">
         <div class="hero__medallion reveal">
-          <!-- Logo provisorio: reemplazar assets/logo-placeholder.svg por el medallón oficial -->
-          <img src="assets/logo-placeholder.svg" alt="Medallón de Niebla (logo provisorio)" width="200" height="200">
+          <img src="assets/niebla-emblema.svg" alt="Niebla" width="200" height="210">
         </div>
         <p class="kicker reveal">Niebla Roasters · Machalí, Chile</p>
         <h1 class="hero__title reveal">Niebla<span class="hero__dash"> — </span><em>Tostaduría mágica</em></h1>
@@ -124,7 +127,6 @@
           <li>Envíos a todo Chile</li>
         </ul>
       </div>
-      <a href="#capitulos" class="hero__scroll" aria-label="Seguir bajando"><span></span></a>
     </section>
 
     <!-- CAPÍTULOS: índice seleccionable. El contenido completo queda en el DOM (SEO); se despliega al tocar. -->
@@ -323,7 +325,7 @@
 
   <footer class="footer">
     <p>Niebla · Tostaduría mágica · Machalí, Chile</p>
-    <p class="footer__small">Sitio en prueba · logo, precios y stock provisorios</p>
+    <p class="footer__small">Sitio en prueba · stock y fechas de tostado provisorios</p>
   </footer>
 
   <!-- Carrito -->

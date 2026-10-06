@@ -173,10 +173,10 @@
   <circle cx="200" cy="84" r="7" fill="none" stroke="#000" stroke-opacity=".45" stroke-width="2"/>
   <rect x="152" y="104" width="96" height="124" rx="6" fill="${c.label}"/>
   <rect x="157" y="109" width="86" height="114" rx="4" fill="none" stroke="#4A281B" stroke-opacity=".55" stroke-width=".8"/>
-  <text x="200" y="130" text-anchor="middle" font-family="Cinzel, serif" font-size="13" font-weight="700" letter-spacing="2.5" fill="#1a110c">NIEBLA</text>
+  <text x="200" y="130" text-anchor="middle" font-family="Amarante, serif" font-size="13" letter-spacing="2.5" fill="#1a110c">NIEBLA</text>
   <line x1="176" y1="138" x2="224" y2="138" stroke="#A75A2B" stroke-width=".8"/>
-  <text x="200" y="160" text-anchor="middle" font-family="Cinzel, serif" font-size="${fit(l1, 11, 76)}" font-weight="600" letter-spacing="1" fill="#2a1a12">${esc(l1.toUpperCase())}</text>
-  <text x="200" y="174" text-anchor="middle" font-family="Cinzel, serif" font-size="${fit(l2, 10, 76)}" letter-spacing="1" fill="#2a1a12">${esc(l2.toUpperCase())}</text>
+  <text x="200" y="160" text-anchor="middle" font-family="Amarante, serif" font-size="${fit(l1, 11, 76)}" font-weight="600" letter-spacing="1" fill="#2a1a12">${esc(l1.toUpperCase())}</text>
+  <text x="200" y="174" text-anchor="middle" font-family="Amarante, serif" font-size="${fit(l2, 10, 76)}" letter-spacing="1" fill="#2a1a12">${esc(l2.toUpperCase())}</text>
   <text x="200" y="194" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="${fit(meta, 6.5, 78, 0.68)}" letter-spacing=".6" fill="#4A281B">${esc(meta)}</text>
   <circle cx="232" cy="212" r="9" fill="#8E2A22"/><circle cx="232" cy="212" r="5.8" fill="none" stroke="#5e1a15" stroke-width="1"/>
   <text x="187" y="214" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="4.6" letter-spacing=".8" fill="#4A281B" opacity=".7">IMAGEN PROVISORIA</text>

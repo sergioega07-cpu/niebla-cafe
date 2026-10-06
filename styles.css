@@ -1,6 +1,12 @@
 /* ==========================================================================
    Niebla · Tostaduría mágica — estilos (vanilla, sin build)
    ========================================================================== */
+/* Tipografía oficial de Niebla (Amarante, SIL OFL 1.1), autoalojada */
+@font-face {
+  font-family: "Amarante";
+  src: url("assets/fonts/amarante.woff2") format("woff2"), url("assets/fonts/amarante.ttf") format("truetype");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
 :root {
   --charcoal: #080605;
   --espresso: #4A281B;
@@ -15,7 +21,7 @@
   --ink-faint: rgba(237, 227, 204, .58);
   --line: rgba(216, 199, 161, .14);
 
-  --f-title: "Cinzel", "Times New Roman", serif;
+  --f-title: "Amarante", "Times New Roman", serif;
   --f-accent: "Cormorant Garamond", Georgia, serif;
   --f-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -151,7 +157,7 @@ em { font-family: var(--f-accent); font-style: italic; font-weight: 400; letter-
 }
 .nav.is-scrolled { background: rgba(8, 6, 5, .55); backdrop-filter: blur(14px) saturate(1.2); -webkit-backdrop-filter: blur(14px) saturate(1.2); box-shadow: 0 1px 0 var(--line); }
 .dev-banner:not([hidden]) ~ .nav { top: 28px; }
-.nav__brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; font: 600 .95rem/1 var(--f-title); letter-spacing: .3em; text-transform: uppercase; }
+.nav__brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; font: 400 .95rem/1 var(--f-title); letter-spacing: .3em; text-transform: uppercase; }
 .nav__links { display: none; gap: clamp(1rem, 2.4vw, 2.2rem); }
 .nav__links a { font: 400 .72rem/1 var(--f-mono); letter-spacing: .2em; text-transform: uppercase; text-decoration: none; color: var(--ink-soft); transition: color .3s; }
 .nav__links a:hover { color: var(--gold); }
@@ -257,9 +263,6 @@ body.menu-open .cart-fab { opacity: 0; pointer-events: none; }
 .hero__claims { list-style: none; padding: 0; margin: 3rem auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1.6rem; font: 400 .68rem/1.4 var(--f-mono); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-faint); }
 .hero__claims li { display: flex; align-items: center; gap: .6rem; }
 .hero__claims li::before { content: "✦"; color: var(--gold); opacity: .6; font-size: .7rem; }
-.hero__scroll { position: absolute; bottom: 1.6rem; left: 50%; translate: -50% 0; width: 22px; height: 36px; border: 1px solid rgba(216, 199, 161, .3); border-radius: 12px; }
-.hero__scroll span { position: absolute; left: 50%; top: 8px; width: 2px; height: 7px; margin-left: -1px; border-radius: 2px; background: var(--parchment); animation: scrollHint 2.4s var(--ease) infinite; }
-@keyframes scrollHint { 0% { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(12px); } }
 
 /* ---------- Tarjetas "luz de vela" ---------- */
 .card {
@@ -413,7 +416,7 @@ body.menu-open .cart-fab { opacity: 0; pointer-events: none; }
 .js .reveal.is-in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .js .reveal { transform: none; transition: opacity .01s; }
-  .hero__medallion::before, .hero__medallion, .hero__scroll span { animation: none; }
+  .hero__medallion::before, .hero__medallion { animation: none; }
 }
 
 /* ---------- Carrito ---------- */

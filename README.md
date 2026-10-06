@@ -12,7 +12,7 @@ https://sergioega07-cpu.github.io/niebla-cafe/
 - `index.html` — estructura, textos y SEO.
 - `styles.css` — estilos.
 - `app.js` — catálogo, carrito, enlace de WhatsApp y animaciones.
-- `assets/` — logo provisorio, imagen para redes, emblemas, `productos-ejemplo.csv` (datos de ejemplo) y `labels/` (etiquetas de cada café en WebP).
+- `assets/` — logo oficial (`niebla-emblema.*` = medallón del cuervo, crema calado para fondo oscuro; `niebla-emblema-solido.*` = medallón con cuervo oscuro, para favicon y fondos claros; `niebla-logo.*` = medallón + palabra NIEBLA), favicons, `fonts/` (tipografía Amarante, SIL OFL), imagen para redes, emblemas, `productos-ejemplo.csv` (datos de ejemplo) y `labels/` (etiquetas de cada café en WebP).
 
 ## Cómo actualizar el café y el stock (Google Sheet)
 
@@ -22,7 +22,7 @@ https://sergioega07-cpu.github.io/niebla-cafe/
    - `molienda`: opciones separadas por `|`, por ejemplo `Grano|Molido espresso|Molido filtro`.
    - `fecha_tostado`: `AAAA-MM-DD` o `DD/MM/AAAA`. Si tiene menos de 15 días aparece "Recién tostado".
    - `stock`: `0` = Agotado, `1–3` = Últimas unidades.
-   - `precio_clp`: solo el número (ej.: `9990`).
+   - `precio_clp`: solo el número, sin `$` ni puntos (ej.: `11500` para 250 g y `39000` para 1 kg).
    - `visible`: `NO` oculta la fila.
    - `imagen_url`: etiqueta del café, por ejemplo `assets/labels/vampiros.webp` (o una URL completa).
    - `altura` y `variedad` (opcionales): por ejemplo `1350 msnm` y `Catuaí Amarillo`.
@@ -35,5 +35,5 @@ Mientras `SHEET_CSV_URL` esté vacío o falle, el sitio usa `assets/productos-ej
 
 ## Pendiente
 
-- Reemplazar `assets/logo-placeholder.svg` por el logo oficial.
-- Confirmar precios, stock y fechas de tostado reales (los del CSV de ejemplo son provisorios).
+- Precios vigentes: $11.500 (250 g) y $39.000 (1 kg), ya cargados en el CSV de ejemplo; la planilla de Google debe usar los mismos en `precio_clp`.
+- Confirmar stock y fechas de tostado reales (los del CSV de ejemplo son provisorios).
