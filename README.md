@@ -22,7 +22,7 @@ https://sergioega07-cpu.github.io/niebla-cafe/
    - `molienda`: opciones separadas por `|`, por ejemplo `Grano|Molido espresso|Molido filtro`.
    - `fecha_tostado`: ya no se muestra en las tarjetas (la fecha va escrita en cada bolsa). La columna se puede dejar vacía o borrar: el sitio la ignora.
    - `stock`: `0` = Agotado, `1–3` = Últimas unidades.
-   - `precio_clp`: solo el número, sin `$` ni puntos (ej.: `11500` para 250 g y `39000` para 1 kg; el descafeinado, `13500` y `62000`).
+   - `precio_clp`: solo el número, sin `$` ni puntos (ej.: `11500` para 250 g y `39000` para 1 kg; el descafeinado, `13500` y `49000`).
    - `visible`: `NO` oculta la fila.
    - `imagen_url`: etiqueta del café, por ejemplo `assets/labels/vampiros.webp` (o una URL completa).
    - `altura` y `variedad` (opcionales): por ejemplo `1350 msnm` y `Catuaí Amarillo`.
@@ -35,6 +35,6 @@ Mientras `SHEET_CSV_URL` esté vacío o falle, el sitio usa `assets/productos-ej
 
 ## Pendiente
 
-- Precios vigentes (ya cargados en el CSV de ejemplo; la planilla de Google debe usar los mismos en `precio_clp`): $11.500 (250 g) y $39.000 (1 kg); Espantapájaros Descafeinado $13.500 (250 g) y $62.000 (1 kg).
+- Precios vigentes (ya cargados en el CSV de ejemplo; la planilla de Google debe usar los mismos en `precio_clp`): $11.500 (250 g) y $39.000 (1 kg); Espantapájaros Descafeinado $13.500 (250 g) y $49.000 (1 kg).
 - Café publicado: Espantapájaros, Espantapájaros Descafeinado y Vampiros.
 - Confirmar stock real (el del CSV de ejemplo es provisorio).
