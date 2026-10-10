@@ -24,7 +24,7 @@
   const STOCK_BAJO = 3;
   const CART_KEY = "niebla-carrito-v1";
   const NAME_KEY = "niebla-nombre-v1";
-  const SITE_URL = "https://sergioega07-cpu.github.io/niebla-cafe/";
+  const SITE_URL = "https://nieblacoffee.cl/";
 
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
