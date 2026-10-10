@@ -672,3 +672,13 @@ main section[tabindex="-1"]:focus { outline: none; }
 .bank__copy.is-done, .bank__all.is-done { border-color: #7fb08a; color: #a9d8b2; }
 .bank__hint { margin: 0; font-size: .8rem; text-align: center; color: var(--ink-soft); }
 @media (prefers-reduced-motion: reduce) { .pago.pop, .bank { animation: none; } }
+
+/* Páginas legales */
+.footer__links a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.footer__links a:hover { color: var(--ink, #eee); }
+.legal { max-width: 720px; margin: 0 auto; padding: 4rem 1.25rem 2rem; font-family: var(--f-body); line-height: 1.7; }
+.legal h1 { font-family: "Cormorant Garamond", serif; font-weight: 500; font-size: clamp(2rem, 5vw, 2.8rem); margin: 0 0 .5rem; }
+.legal h2 { font-family: "Cormorant Garamond", serif; font-weight: 500; font-size: 1.5rem; margin: 2rem 0 .5rem; }
+.legal a { color: inherit; text-decoration: underline; }
+.legal__back { display: inline-block; margin-bottom: 2rem; font: 400 .75rem/1 var(--f-mono); letter-spacing: .15em; text-transform: uppercase; }
+.legal__meta { opacity: .6; font-size: .85rem; }
