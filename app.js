@@ -18,7 +18,7 @@
   // Pegar aquí el enlace de Google Sheets > Archivo > Compartir > Publicar en la web > (hoja) > CSV.
   // Ej: "https://docs.google.com/spreadsheets/d/e/2PACX-XXXX/pub?gid=0&single=true&output=csv"
   // Mientras esté vacío (o falle), se usa assets/productos-ejemplo.csv y se muestra el aviso "Datos de ejemplo".
-  const SHEET_CSV_URL = "";
+  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR3q6EliurFneCq_EGOYeC24JWwfwXeNEB3nK0h0StznvtLdKEsoLL2iW-ts4K6KXtlrzdmt6tdstM5/pub?gid=356496886&single=true&output=csv";
   const LOCAL_CSV_URL = "assets/productos-ejemplo.csv";
   const WA_NUMBER = "56940220026";
   const STOCK_BAJO = 3;
