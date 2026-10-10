@@ -309,13 +309,164 @@
   const cartTotal = () => cart.reduce((s, i) => s + i.precio * i.qty, 0);
   const cartCount = () => cart.reduce((s, i) => s + i.qty, 0);
 
+  /* ---------- Checkout: datos del cliente ---------- */
+  const FORM_KEY = "niebla-checkout-v1";
+  const co = (id) => $("#co-" + id);
+  const SHIP_FIELDS = ["rut", "phone", "email", "region", "city", "comuna", "street", "depto", "ref"];
+  const touched = new Set();
+
+  function cleanRut(v) { return String(v).toUpperCase().replace(/[^0-9K]/g, ""); }
+  function formatRut(v) {
+    const c = cleanRut(v).slice(0, 9); if (c.length < 2) return c;
+    const body = c.slice(0, -1).replace(/K/g, ""), dv = c.slice(-1);
+    return body.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "-" + dv;
+  }
+  function rutValid(v) {
+    const c = cleanRut(v); if (!/^\d{7,8}[0-9K]$/.test(c)) return false;
+    let sum = 0, m = 2;
+    for (let i = c.length - 2; i >= 0; i--) { sum += +c[i] * m; m = m === 7 ? 2 : m + 1; }
+    const r = 11 - (sum % 11), dv = r === 11 ? "0" : r === 10 ? "K" : String(r);
+    return dv === c.slice(-1);
+  }
+  function phoneDigits(v) {
+    let d = String(v).replace(/\D/g, "");
+    if (d.startsWith("56")) d = d.slice(2);
+    return d.slice(0, 9);
+  }
+  function formatPhone(v) {
+    const d = phoneDigits(v); if (!d) return "";
+    const p = [d.slice(0, 1), d.slice(1, 5), d.slice(5, 9)].filter(Boolean);
+    return "+56 " + p.join(" ");
+  }
+  const phoneValid = (v) => /^9\d{8}$/.test(phoneDigits(v));
+  const emailValid = (v) => !v || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+
+  const tipo = () => ($("input[name=tipo]:checked") || {}).value || "";
+  const val = (id) => co(id).value.trim();
+
+  const pago = () => (tipo() === "envio" ? "transferencia" : (($("input[name=pago]:checked") || {}).value || ""));
+  function errorsFor() {
+    const e = baseErrors();
+    if (!Object.keys(e).length && !pago()) e.pago = "Elige cómo vas a pagar.";
+    return e;
+  }
+  function baseErrors() {
+    const e = {};
+    const name = val("name");
+    if (!name) e.name = "Escribe tu nombre y apellido.";
+    else if (name.split(/\s+/).length < 2) e.name = "Agrega también tu apellido.";
+    if (!tipo()) e.tipo = "Elige retiro en tienda o envío a domicilio.";
+    if (tipo() === "envio") {
+      if (!val("rut")) e.rut = "Ingresa tu RUT.";
+      else if (!rutValid(val("rut"))) e.rut = "Ese RUT no es válido. Revisa el dígito verificador.";
+      if (!val("phone")) e.phone = "Ingresa un teléfono de contacto.";
+      else if (!phoneValid(val("phone"))) e.phone = "Usa un celular chileno: +56 9 y 8 dígitos.";
+      if (!emailValid(val("email"))) e.email = "Ese correo no parece válido.";
+      if (!val("city")) e.city = "Ingresa la ciudad.";
+      if (!val("comuna")) e.comuna = "Ingresa la comuna.";
+      if (!val("street")) e.street = "Ingresa calle y número.";
+      else if (!/\d/.test(val("street"))) e.street = "Falta el número de la calle.";
+    }
+    return e;
+  }
+  function showErrors(all = false) {
+    const e = errorsFor();
+    for (const k of ["name", "tipo", "pago", ...SHIP_FIELDS]) {
+      const err = $("#co-" + k + "-err"); if (!err) continue;
+      const show = (all || touched.has(k)) && e[k];
+      err.textContent = show ? e[k] : "";
+      const inp = co(k);
+      if (inp) inp.setAttribute("aria-invalid", show ? "true" : "false");
+    }
+    return e;
+  }
+
+  function saveForm() {
+    const d = { name: co("name").value, tipo: tipo(), pago: ($("input[name=pago]:checked") || {}).value || "" };
+    for (const k of SHIP_FIELDS) d[k] = co(k).value;
+    try { localStorage.setItem(FORM_KEY, JSON.stringify(d)); } catch { /* modo privado */ }
+  }
+  function loadForm() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(FORM_KEY)); } catch { /* */ }
+    if (!d) { try { const n = localStorage.getItem(NAME_KEY); if (n) d = { name: n }; } catch { /* */ } }
+    if (!d) return;
+    if (d.name) co("name").value = d.name;
+    for (const k of SHIP_FIELDS) if (d[k] != null && d[k] !== "") co(k).value = d[k];
+    const r = d.tipo && $(`input[name=tipo][value="${d.tipo}"]`); if (r) r.checked = true;
+    const pg = d.pago && $(`input[name=pago][value="${d.pago}"]`); if (pg) pg.checked = true;
+  }
+
+  function syncShip({ animate = true } = {}) {
+    const ship = $("#ship"), open = tipo() === "envio";
+    ship.setAttribute("aria-hidden", open ? "false" : "true");
+    $$("input, select, textarea", ship).forEach((el) => { el.disabled = !open; });
+    if (!animate || reduceMotion) ship.classList.add("no-anim");
+    ship.classList.toggle("is-open", open);
+    if (!animate || reduceMotion) { void ship.offsetWidth; ship.classList.remove("no-anim"); }
+    syncPago();
+    $("#cart-send").textContent = tipo() === "retiro" ? "Pedir y coordinar retiro por WhatsApp" : "Enviar pedido por WhatsApp";
+  }
+
+  function syncPago() {
+    const sec = $("#pago"), envio = tipo() === "envio";
+    const ready = !Object.keys(baseErrors()).length;
+    if (ready && sec.hidden) { sec.hidden = false; if (!reduceMotion) { sec.classList.remove("pop"); void sec.offsetWidth; sec.classList.add("pop"); } }
+    else if (!ready) sec.hidden = true;
+    const ef = $("input[name=pago][value=efectivo]"), tr = $("input[name=pago][value=transferencia]");
+    $("#pago-efectivo").hidden = envio; ef.disabled = envio;
+    if (envio) tr.checked = true;
+    $("#pago-opts").classList.toggle("tipo--single", envio);
+    $("#pago-note").hidden = !envio;
+    $("#bank").hidden = pago() !== "transferencia";
+  }
+
+  const BANK = { titular: "Niebla Roasters SpA", rut: "78.108.362-3", banco: "Mercado Pago", tipo: "Cuenta Vista", cuenta: "1088227491", correo: "niebla.tostaduria@gmail.com" };
+  const BANK_ALL = `${BANK.titular}\nRUT: ${BANK.rut}\nBanco: ${BANK.banco}\n${BANK.tipo}\nNúmero de cuenta: ${BANK.cuenta}\nCorreo: ${BANK.correo}`;
+  async function copyText(t) {
+    try { await navigator.clipboard.writeText(t); return true; } catch { /* fallback */ }
+    const ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;opacity:0;top:0;left:0";
+    document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand("copy"); } catch { /* */ }
+    ta.remove(); return ok;
+  }
+  $("#bank").addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-copy]"); if (!b) return;
+    const k = b.dataset.copy, ok = await copyText(k === "all" ? BANK_ALL : BANK[k]);
+    const label = b.textContent;
+    b.textContent = ok ? "¡Copiado!" : "No se pudo copiar"; b.classList.add("is-done");
+    $("#copy-status").textContent = ok ? (k === "all" ? "Datos de transferencia copiados" : "Copiado") : "No se pudo copiar";
+    setTimeout(() => { b.textContent = label; b.classList.remove("is-done"); }, 1600);
+  });
+
   function buildOrderMessage() {
-    const name = $("#cart-name").value.trim();
-    const lines = ["Hola Niebla, quiero hacer este pedido:"];
-    for (const i of cart) lines.push(`- ${i.qty}× ${i.nombre} ${i.formato} (${i.molienda}) — ${clp(i.precio * i.qty)}`);
-    lines.push(`Total: ${clp(cartTotal())}`);
-    if (name) lines.push(`Nombre: ${name}`);
-    return lines.join("\n");
+    const L = ["Hola Niebla, quiero hacer este pedido:", ""];
+    for (const i of cart) {
+      L.push(`• ${i.nombre}`);
+      L.push(`  Formato: ${i.formato} · Molienda: ${i.molienda}`);
+      L.push(`  Cantidad: ${i.qty} · Subtotal: ${clp(i.precio * i.qty)}`);
+    }
+    L.push("", `*Total: ${clp(cartTotal())}*`, "");
+    const t = tipo();
+    L.push(`Tipo de pedido: ${t === "envio" ? "Envío a domicilio" : "Retiro en tienda"}`);
+    L.push(`Nombre: ${val("name")}`);
+    L.push(`Forma de pago: ${pago() === "efectivo" ? "Efectivo" : "Transferencia"}`);
+    if (pago() === "transferencia") L.push("Enviaré el comprobante de transferencia.");
+    if (t === "retiro") {
+      L.push("", "Es para retiro en tienda, ¿coordinamos día y hora?");
+    } else {
+      L.push("", "*Datos de envío*");
+      L.push(`RUT: ${formatRut(val("rut"))}`);
+      L.push(`Teléfono: ${formatPhone(val("phone"))}`);
+      if (val("email")) L.push(`Correo: ${val("email")}`);
+      L.push(`Región: ${val("region")}`);
+      L.push(`Ciudad: ${val("city")}`);
+      L.push(`Comuna: ${val("comuna")}`);
+      L.push(`Dirección: ${val("street")}${val("depto") ? ", " + val("depto") : ""}`);
+      if (val("ref")) L.push(`Referencia: ${val("ref").replace(/\s+/g, " ")}`);
+      L.push("", "Quedo atento al costo de despacho.");
+    }
+    return L.join("\n");
   }
 
   function renderCart() {
@@ -334,16 +485,26 @@
     const n = cartCount();
     $("#cart-empty").hidden = n > 0;
     $("#cart-foot").hidden = n === 0;
+    $("#checkout").hidden = n === 0;
     $("#cart-total").textContent = clp(cartTotal());
     const count = $("#cart-count"); count.hidden = n === 0; count.textContent = n;
     $("#cart-open").setAttribute("aria-label", n ? `Abrir carrito (${n} productos)` : "Abrir carrito");
     updateSendLink();
   }
   function updateSendLink() {
-    const a = $("#cart-send");
+    const a = $("#cart-send"), status = $("#cart-status");
     if (!cart.length) { a.href = waLink("Hola Niebla"); a.setAttribute("aria-disabled", "true"); return; }
-    a.removeAttribute("aria-disabled");
-    a.href = waLink(buildOrderMessage());
+    const e = errorsFor(), n = Object.keys(e).length;
+    if (n) {
+      a.setAttribute("aria-disabled", "true"); a.setAttribute("href", "#checkout");
+      status.textContent = e.name && !val("name") ? "Completa tu nombre y elige el tipo de pedido para continuar."
+        : e.tipo ? "Elige el tipo de pedido para continuar."
+        : e.pago && n === 1 ? "Elige la forma de pago para continuar."
+        : `Falta${n > 1 ? "n" : ""} ${n} dato${n > 1 ? "s" : ""} por completar.`;
+    } else {
+      a.removeAttribute("aria-disabled"); status.textContent = "";
+      a.href = waLink(buildOrderMessage());
+    }
   }
 
   $("#cart-items").addEventListener("click", (e) => {
@@ -358,11 +519,37 @@
     }
     saveCart(); renderCart();
   });
-  const nameInput = $("#cart-name");
-  try { nameInput.value = localStorage.getItem(NAME_KEY) || ""; } catch { /* */ }
-  nameInput.addEventListener("input", () => { try { localStorage.setItem(NAME_KEY, nameInput.value); } catch { /* */ } updateSendLink(); });
+  const form = $("#checkout");
+  loadForm(); syncShip({ animate: false });
+  form.addEventListener("submit", (e) => e.preventDefault());
+  form.addEventListener("input", (e) => {
+    const k = (e.target.id || "").replace(/^co-/, "");
+    if (k === "rut") { e.target.value = formatRut(e.target.value); }
+    if (k === "phone" && e.inputType !== "deleteContentBackward") e.target.value = formatPhone(e.target.value);
+    if (e.target.name === "tipo") { touched.add("tipo"); syncShip(); }
+    if (e.target.name === "pago") touched.add("pago");
+    syncPago(); saveForm(); showErrors(); updateSendLink();
+  });
+  form.addEventListener("change", (e) => {
+    if (e.target.name === "tipo") { touched.add("tipo"); syncShip(); }
+    if (e.target.name === "pago") touched.add("pago");
+    syncPago(); saveForm(); showErrors(); updateSendLink();
+  });
+  form.addEventListener("focusout", (e) => {
+    const k = (e.target.id || "").replace(/^co-/, ""); if (!k) return;
+    if (k === "phone" && e.target.value) e.target.value = formatPhone(e.target.value);
+    touched.add(k); showErrors(); updateSendLink();
+  });
   $("#cart-send").addEventListener("click", (e) => {
     if (!cart.length) { e.preventDefault(); return; }
+    const errs = showErrors(true);
+    const keys = Object.keys(errs);
+    if (keys.length) {
+      e.preventDefault(); updateSendLink();
+      const first = keys[0] === "tipo" ? $("input[name=tipo]") : keys[0] === "pago" ? $("input[name=pago]:not(:disabled)") : co(keys[0]);
+      if (first) { first.focus({ preventScroll: true }); first.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" }); }
+      return;
+    }
     e.currentTarget.href = waLink(buildOrderMessage());
   });
 

@@ -344,14 +344,120 @@
     <div class="cart__body">
       <ul class="cart__items" id="cart-items"></ul>
       <p class="cart__empty" id="cart-empty">Tu caldero está vacío.<br><a href="#cafe" data-close-cart>Ver cafés disponibles</a></p>
+      <form class="checkout" id="checkout" novalidate>
+        <h3 class="checkout__title">Tus datos</h3>
+          <div class="field">
+            <label for="co-name"><span>Nombre y apellido</span></label>
+            <input type="text" id="co-name" name="name" autocomplete="name" placeholder="Ej: Morgana Pérez" required aria-required="true" aria-describedby="co-name-err">
+            <p class="field__err" id="co-name-err" aria-live="polite"></p>
+          </div>
+        <fieldset class="checkout__tipo">
+          <legend><span>Tipo de pedido</span></legend>
+          <div class="tipo">
+            <label class="tipo__opt"><input type="radio" name="tipo" value="retiro"><span class="tipo__card"><strong>Retiro en tienda</strong><small>Coordinas el retiro con Carlos por WhatsApp</small></span></label>
+            <label class="tipo__opt"><input type="radio" name="tipo" value="envio"><span class="tipo__card"><strong>Envío a domicilio</strong><small>Te lo enviamos a todo Chile</small></span></label>
+          </div>
+          <p class="field__err" id="co-tipo-err" aria-live="polite"></p>
+        </fieldset>
+        <div class="ship" id="ship" aria-hidden="true">
+          <div class="ship__inner" id="ship-inner">
+            <div class="ship__grid">
+          <div class="field">
+            <label for="co-rut"><span>RUT</span></label>
+            <input type="text" id="co-rut" name="rut" autocomplete="off" placeholder="12.345.678-9" required aria-required="true" aria-describedby="co-rut-err" inputmode="text" maxlength="12">
+            <p class="field__err" id="co-rut-err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="co-phone"><span>Teléfono</span></label>
+            <input type="tel" id="co-phone" name="phone" autocomplete="tel" placeholder="+56 9 1234 5678" required aria-required="true" aria-describedby="co-phone-err" inputmode="tel" maxlength="16">
+            <p class="field__err" id="co-phone-err" aria-live="polite"></p>
+          </div>
+          <div class="field field--full">
+            <label for="co-email"><span>Correo <em>(opcional)</em></span></label>
+            <input type="email" id="co-email" name="email" autocomplete="email" placeholder="tu@correo.cl" aria-describedby="co-email-err">
+            <p class="field__err" id="co-email-err" aria-live="polite"></p>
+          </div>
+          <div class="field field--full">
+            <label for="co-region"><span>Región</span></label>
+            <div class="select"><select id="co-region" name="region" autocomplete="address-level1" required>
+              <option value="Arica y Parinacota">Arica y Parinacota</option>
+              <option value="Tarapacá">Tarapacá</option>
+              <option value="Antofagasta">Antofagasta</option>
+              <option value="Atacama">Atacama</option>
+              <option value="Coquimbo">Coquimbo</option>
+              <option value="Valparaíso">Valparaíso</option>
+              <option value="Metropolitana de Santiago">Metropolitana de Santiago</option>
+              <option value="Libertador General Bernardo O&#39;Higgins" selected>Libertador General Bernardo O&#39;Higgins</option>
+              <option value="Maule">Maule</option>
+              <option value="Ñuble">Ñuble</option>
+              <option value="Biobío">Biobío</option>
+              <option value="La Araucanía">La Araucanía</option>
+              <option value="Los Ríos">Los Ríos</option>
+              <option value="Los Lagos">Los Lagos</option>
+              <option value="Aysén del General Carlos Ibáñez del Campo">Aysén del General Carlos Ibáñez del Campo</option>
+              <option value="Magallanes y de la Antártica Chilena">Magallanes y de la Antártica Chilena</option>
+            </select></div>
+          </div>
+          <div class="field">
+            <label for="co-city"><span>Ciudad</span></label>
+            <input type="text" id="co-city" name="city" autocomplete="address-level2" placeholder="Ej: Rancagua" required aria-required="true" aria-describedby="co-city-err">
+            <p class="field__err" id="co-city-err" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="co-comuna"><span>Comuna</span></label>
+            <input type="text" id="co-comuna" name="comuna" autocomplete="address-level3" placeholder="Ej: Machalí" required aria-required="true" aria-describedby="co-comuna-err">
+            <p class="field__err" id="co-comuna-err" aria-live="polite"></p>
+          </div>
+          <div class="field field--full">
+            <label for="co-street"><span>Calle y número</span></label>
+            <input type="text" id="co-street" name="street" autocomplete="address-line1" placeholder="Ej: Av. San Juan 1234" required aria-required="true" aria-describedby="co-street-err">
+            <p class="field__err" id="co-street-err" aria-live="polite"></p>
+          </div>
+          <div class="field field--full">
+            <label for="co-depto"><span>Depto / casa <em>(opcional)</em></span></label>
+            <input type="text" id="co-depto" name="depto" autocomplete="address-line2" placeholder="Ej: Depto 302" aria-describedby="co-depto-err">
+            <p class="field__err" id="co-depto-err" aria-live="polite"></p>
+          </div>
+          <div class="field field--full">
+            <label for="co-ref"><span>Referencia para el repartidor <em>(opcional)</em></span></label>
+            <textarea id="co-ref" name="ref" rows="2" maxlength="160" placeholder="Ej: portón negro, tocar timbre"></textarea>
+          </div>
+            </div>
+            <p class="ship__note">El costo de despacho se coordina por WhatsApp.</p>
+          </div>
+        </div>
+        <section class="pago" id="pago" aria-labelledby="pago-title" hidden>
+          <h3 class="checkout__title" id="pago-title">Forma de pago</h3>
+          <fieldset class="checkout__tipo">
+            <legend class="sr-only">Forma de pago</legend>
+            <div class="tipo" id="pago-opts">
+              <label class="tipo__opt" id="pago-efectivo"><input type="radio" name="pago" value="efectivo"><span class="tipo__card"><strong>Efectivo</strong><small>Pagas al retirar</small></span></label>
+              <label class="tipo__opt"><input type="radio" name="pago" value="transferencia"><span class="tipo__card"><strong>Transferencia</strong><small>A la cuenta de Niebla</small></span></label>
+            </div>
+            <p class="pago__note" id="pago-note" hidden>Para envíos el pago es solo por transferencia.</p>
+            <p class="field__err" id="co-pago-err" aria-live="polite"></p>
+          </fieldset>
+          <div class="bank" id="bank" hidden>
+            <p class="bank__title">Datos para transferir</p>
+            <dl class="bank__list">
+            <div class="bank__row"><dt>Titular</dt><dd><span data-bank="titular">Niebla Roasters SpA</span><button type="button" class="bank__copy" data-copy="titular" aria-label="Copiar titular">Copiar</button></dd></div>
+            <div class="bank__row"><dt>RUT</dt><dd><span data-bank="rut">78.108.362-3</span><button type="button" class="bank__copy" data-copy="rut" aria-label="Copiar rut">Copiar</button></dd></div>
+            <div class="bank__row"><dt>Banco</dt><dd><span data-bank="banco">Mercado Pago</span><button type="button" class="bank__copy" data-copy="banco" aria-label="Copiar banco">Copiar</button></dd></div>
+            <div class="bank__row"><dt>Tipo de cuenta</dt><dd><span data-bank="tipo">Cuenta Vista</span><button type="button" class="bank__copy" data-copy="tipo" aria-label="Copiar tipo de cuenta">Copiar</button></dd></div>
+            <div class="bank__row"><dt>Número de cuenta</dt><dd><span data-bank="cuenta">1088227491</span><button type="button" class="bank__copy" data-copy="cuenta" aria-label="Copiar número de cuenta">Copiar</button></dd></div>
+            <div class="bank__row"><dt>Correo</dt><dd><span data-bank="correo">niebla.tostaduria@gmail.com</span><button type="button" class="bank__copy" data-copy="correo" aria-label="Copiar correo">Copiar</button></dd></div>
+            </dl>
+            <button type="button" class="btn btn--ghost btn--block bank__all" data-copy="all">Copiar todos los datos</button>
+            <p class="bank__hint">Envía el comprobante por WhatsApp para confirmar tu pedido.</p>
+            <p class="sr-only" id="copy-status" aria-live="polite"></p>
+          </div>
+        </section>
+      </form>
     </div>
     <footer class="cart__foot" id="cart-foot">
       <div class="cart__total"><span>Total</span><strong id="cart-total">$0</strong></div>
-      <label class="field">
-        <span>Tu nombre (opcional)</span>
-        <input type="text" id="cart-name" autocomplete="name" placeholder="Ej: Morgana">
-      </label>
-      <a class="btn btn--primary btn--block" id="cart-send" href="https://wa.me/56940220026" target="_blank" rel="noopener">Enviar pedido por WhatsApp</a>
+      <p class="cart__status" id="cart-status" aria-live="polite"></p>
+      <a class="btn btn--primary btn--block" id="cart-send" href="https://wa.me/56940220026" target="_blank" rel="noopener" aria-describedby="cart-status">Enviar pedido por WhatsApp</a>
       <p class="cart__hint">No se cobra nada aquí. Carlos confirma stock, pago y envío por WhatsApp.</p>
     </footer>
   </aside>
