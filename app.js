@@ -67,6 +67,10 @@
   const isHidden = (v) => /^(no|false|0|n)$/i.test(String(v || "").trim());
   const toInt = (v) => { const n = parseInt(String(v).replace(/[^\d-]/g, ""), 10); return Number.isFinite(n) ? n : 0; };
 
+  const safeImg = (u) => {
+    const v = String(u || "").trim(); if (!v) return "";
+    try { const x = new URL(v, location.href); return x.protocol === "https:" || (x.origin === location.origin && !/^[a-z][a-z0-9+.-]*:/i.test(v)) ? v : ""; } catch { return ""; }
+  };
   function groupProducts(rows) {
     const map = new Map();
     for (const r of rows) {
@@ -82,7 +86,7 @@
       const p = map.get(r.id);
       // Si alguna fila del grupo trae más info, se completa
       for (const k of ["nombre", "categoria", "origen", "proceso", "tueste", "descripcion", "altura", "variedad"]) if (!p[k] && r[k]) p[k] = r[k];
-      if (!p.imagen && r.imagen_url) p.imagen = r.imagen_url;
+      if (!p.imagen && r.imagen_url) p.imagen = safeImg(r.imagen_url);
       p.formatos.push({
         formato: r.formato || "Único",
         precio: toInt(r.precio_clp),
@@ -272,6 +276,8 @@
   /* ---------- Carrito (localStorage) ---------- */
   let cart = [];
   try { cart = JSON.parse(localStorage.getItem(CART_KEY)) || []; if (!Array.isArray(cart)) cart = []; } catch { cart = []; }
+  cart = cart.filter((i) => i && typeof i.id === "string" && i.id && typeof i.key === "string")
+    .map((i) => ({ ...i, qty: Math.min(99, Math.max(1, parseInt(i.qty, 10) || 1)), precio: Math.max(0, parseInt(i.precio, 10) || 0) }));
   const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch { /* modo privado */ } };
   const keyOf = (id, formato, molienda) => `${id}|${formato}|${molienda}`;
   function stockFor(item) {
@@ -285,7 +291,7 @@
     if (qtyOfFormat(p.id, f.formato) >= f.stock) { toast(`No queda más stock de ${p.nombre} ${f.formato}`); return; }
     const key = keyOf(p.id, f.formato, molienda);
     const it = cart.find((i) => i.key === key);
-    if (it) it.qty++;
+    if (it) { if (it.qty >= 99) return; it.qty++; }
     else cart.push({ key, id: p.id, nombre: p.nombre, formato: f.formato, molienda, precio: f.precio, qty: 1 });
     saveCart(); renderCart();
     toast(`Añadido: ${p.nombre} ${f.formato} (${molienda})`);
@@ -381,20 +387,24 @@
     return e;
   }
 
+  // Solo el nombre se recuerda entre visitas; el resto (RUT, teléfono, dirección…) vive en sessionStorage y se borra al enviar.
+  try { localStorage.removeItem(FORM_KEY); } catch { /* */ }
   function saveForm() {
-    const d = { name: co("name").value, tipo: tipo(), pago: ($("input[name=pago]:checked") || {}).value || "" };
+    const d = { tipo: tipo(), pago: ($("input[name=pago]:checked") || {}).value || "" };
     for (const k of SHIP_FIELDS) d[k] = co(k).value;
-    try { localStorage.setItem(FORM_KEY, JSON.stringify(d)); } catch { /* modo privado */ }
+    try { localStorage.setItem(NAME_KEY, co("name").value); } catch { /* modo privado */ }
+    try { sessionStorage.setItem(FORM_KEY, JSON.stringify(d)); } catch { /* modo privado */ }
   }
+  function clearForm() { try { sessionStorage.removeItem(FORM_KEY); } catch { /* */ } }
   function loadForm() {
     let d = null;
-    try { d = JSON.parse(localStorage.getItem(FORM_KEY)); } catch { /* */ }
-    if (!d) { try { const n = localStorage.getItem(NAME_KEY); if (n) d = { name: n }; } catch { /* */ } }
-    if (!d) return;
+    try { d = JSON.parse(sessionStorage.getItem(FORM_KEY)); } catch { /* */ }
+    d = d || {};
+    try { const n = localStorage.getItem(NAME_KEY); if (n) d.name = n; } catch { /* */ }
     if (d.name) co("name").value = d.name;
     for (const k of SHIP_FIELDS) if (d[k] != null && d[k] !== "") co(k).value = d[k];
-    const r = d.tipo && $(`input[name=tipo][value="${d.tipo}"]`); if (r) r.checked = true;
-    const pg = d.pago && $(`input[name=pago][value="${d.pago}"]`); if (pg) pg.checked = true;
+    const r = d.tipo && $(`input[name=tipo][value="${CSS.escape(d.tipo)}"]`); if (r) r.checked = true;
+    const pg = d.pago && $(`input[name=pago][value="${CSS.escape(d.pago)}"]`); if (pg) pg.checked = true;
   }
 
   function syncShip({ animate = true } = {}) {
@@ -477,7 +487,7 @@
         <div><p class="cart-item__name">${esc(i.nombre)}</p><p class="cart-item__opt">${esc(i.formato)} · ${esc(i.molienda)} · ${clp(i.precio)} c/u</p></div>
         <div class="cart-item__price">${clp(i.precio * i.qty)}</div>
         <div class="cart-item__row">
-          <div class="qty"><button type="button" data-q="-1" aria-label="Quitar uno">−</button><output aria-live="polite">${i.qty}</output><button type="button" data-q="1" aria-label="Agregar uno" ${maxed ? "disabled" : ""}>+</button></div>
+          <div class="qty"><button type="button" data-q="-1" aria-label="Quitar uno">−</button><output aria-live="polite">${esc(i.qty)}</output><button type="button" data-q="1" aria-label="Agregar uno" ${maxed ? "disabled" : ""}>+</button></div>
           <button type="button" class="cart-item__remove" data-remove>Eliminar</button>
         </div>
       </li>`;
@@ -514,7 +524,7 @@
     const q = e.target.closest("[data-q]");
     if (q) {
       const d = +q.dataset.q;
-      if (d > 0 && qtyOfFormat(it.id, it.formato) >= stockFor(it)) return;
+      if (d > 0 && (it.qty >= 99 || qtyOfFormat(it.id, it.formato) >= stockFor(it))) return;
       it.qty += d; if (it.qty <= 0) cart = cart.filter((i) => i !== it);
     }
     saveCart(); renderCart();
@@ -551,6 +561,7 @@
       return;
     }
     e.currentTarget.href = waLink(buildOrderMessage());
+    clearForm();
   });
 
   // Abrir / cerrar
