@@ -429,6 +429,7 @@
     $("#pago-opts").classList.toggle("tipo--single", envio);
     $("#pago-note").hidden = !envio;
     $("#bank").hidden = pago() !== "transferencia";
+    $("#cash-note").hidden = pago() !== "efectivo";
   }
 
   const BANK = { titular: "Niebla Roasters SpA", rut: "78.108.362-3", banco: "Mercado Pago", tipo: "Cuenta Vista", cuenta: "1088227491", correo: "niebla.tostaduria@gmail.com" };
