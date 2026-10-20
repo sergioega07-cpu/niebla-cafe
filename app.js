@@ -21,7 +21,6 @@
   const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR3q6EliurFneCq_EGOYeC24JWwfwXeNEB3nK0h0StznvtLdKEsoLL2iW-ts4K6KXtlrzdmt6tdstM5/pub?gid=356496886&single=true&output=csv";
   const LOCAL_CSV_URL = "assets/productos-ejemplo.csv";
   const WA_NUMBER = "56940220026";
-  const STOCK_BAJO = 3;
   const CART_KEY = "niebla-carrito-v1";
   const NAME_KEY = "niebla-nombre-v1";
   const SITE_URL = "https://nieblacoffee.cl/";
@@ -90,7 +89,7 @@
       p.formatos.push({
         formato: r.formato || "Único",
         precio: toInt(r.precio_clp),
-        stock: toInt(r.stock),
+        stock: hasStock(r.stock),
         moliendas: (r.molienda || "").split(/[|;]/).map((s) => s.trim()).filter(Boolean),
       });
     }
@@ -107,7 +106,14 @@
     return m ? parseFloat(m[1]) * (m[2] === "kg" ? 1000 : 1) : 1e9;
   }
   const totalStock = (p) => p.formatos.reduce((s, f) => s + Math.max(0, f.stock), 0);
-  const stockState = (n) => (n <= 0 ? { key: "out", label: "Agotado" } : n <= STOCK_BAJO ? { key: "low", label: "Últimas unidades" } : { key: "ok", label: "Disponible" });
+  const stockState = (n) => (n <= 0 ? { key: "out", label: "Sin stock" } : { key: "ok", label: "Con stock" });
+  // Stock binario: "SI" / "Con stock" / cualquier número > 0 = hay (tope 99 por carrito); vacío, "NO", "Sin stock", "Agotado" o 0 = no hay.
+  function hasStock(v) {
+    const t = String(v || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (!t || /^(no|sin stock|agotado|0+)$/.test(t)) return 0;
+    if (/^\d+$/.test(t)) return parseInt(t, 10) > 0 ? 99 : 0;
+    return /^(si|s|yes|hay|con stock|disponible|x)$/.test(t) ? 99 : 0;
+  }
 
   async function fetchText(url) {
     const res = await fetch(url, { cache: "no-store" });
@@ -214,7 +220,7 @@
           <div>
             <span class="opt-label" id="fl-${esc(p.id)}">Formato</span>
             <div class="seg" role="group" aria-labelledby="fl-${esc(p.id)}">
-              ${p.formatos.map((fo, i) => `<button type="button" data-act="fmt" data-i="${i}" aria-pressed="${i === sel.f}" class="${fo.stock <= 0 ? "is-out" : ""}" ${fo.stock <= 0 ? `title="Agotado"` : ""}>${esc(fo.formato)}</button>`).join("")}
+              ${p.formatos.map((fo, i) => `<button type="button" data-act="fmt" data-i="${i}" aria-pressed="${i === sel.f}" class="${fo.stock <= 0 ? "is-out" : ""}" ${fo.stock <= 0 ? `title="Sin stock"` : ""}>${esc(fo.formato)}</button>`).join("")}
             </div>
           </div>
           <label>
@@ -224,7 +230,7 @@
         </div>
         <div class="product__buy">
           <p class="price" data-role="price">${clp(f.precio)}<small>${esc(f.formato)}</small></p>
-          <button type="button" class="btn btn--primary" data-act="add" ${f.stock <= 0 ? "disabled" : ""}>${f.stock <= 0 ? "Agotado" : "Añadir"}</button>
+          <button type="button" class="btn btn--primary" data-act="add" ${f.stock <= 0 ? "disabled" : ""}>${f.stock <= 0 ? "Sin stock" : "Añadir"}</button>
         </div>
       </div>
     </article>`;
@@ -288,7 +294,7 @@
 
   function addToCart(p, f, molienda) {
     if (f.stock <= 0) return;
-    if (qtyOfFormat(p.id, f.formato) >= f.stock) { toast(`No queda más stock de ${p.nombre} ${f.formato}`); return; }
+    if (qtyOfFormat(p.id, f.formato) >= f.stock) { toast(`Máximo por pedido: ${p.nombre} ${f.formato}`); return; }
     const key = keyOf(p.id, f.formato, molienda);
     const it = cart.find((i) => i.key === key);
     if (it) { if (it.qty >= 99) return; it.qty++; }
@@ -735,7 +741,7 @@
             name: `${p.nombre} ${f.formato}`,
             price: String(f.precio),
             priceCurrency: "CLP",
-            availability: f.stock > 0 ? (f.stock <= STOCK_BAJO ? "https://schema.org/LimitedAvailability" : "https://schema.org/InStock") : "https://schema.org/OutOfStock",
+            availability: f.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
             url: SITE_URL + "#cafe",
             seller: { "@id": SITE_URL + "#niebla" },
           })),
