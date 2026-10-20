@@ -66,6 +66,7 @@
   const isHidden = (v) => /^(no|false|0|n)$/i.test(String(v || "").trim());
   const toInt = (v) => { const n = parseInt(String(v).replace(/[^\d-]/g, ""), 10); return Number.isFinite(n) ? n : 0; };
 
+  const LABEL_BY_ID = { gabriela: "espantapajaros-gabriela", huila: "espantapajaros-huila" };
   const safeImg = (u) => {
     const v = String(u || "").trim(); if (!v) return "";
     try { const x = new URL(v, location.href); return x.protocol === "https:" || (x.origin === location.origin && !/^[a-z][a-z0-9+.-]*:/i.test(v)) ? v : ""; } catch { return ""; }
@@ -86,6 +87,8 @@
       // Si alguna fila del grupo trae más info, se completa
       for (const k of ["nombre", "categoria", "origen", "proceso", "tueste", "descripcion", "altura", "variedad"]) if (!p[k] && r[k]) p[k] = r[k];
       if (!p.imagen && r.imagen_url) p.imagen = safeImg(r.imagen_url);
+      // Sin imagen_url en la hoja: se usa la etiqueta por id (assets/labels/<id>.webp); si no existe, cae a la bolsa ilustrada.
+      if (!p.imagen && !r.imagen_url && r.id) p.imagen = safeImg(`assets/labels/${LABEL_BY_ID[r.id] || r.id}.webp`);
       p.formatos.push({
         formato: r.formato || "Único",
         precio: toInt(r.precio_clp),
@@ -188,6 +191,17 @@
     if (!lvl) return "";
     return `<span class="roast-dots" aria-hidden="true">${[1, 2, 3].map((n) => `<i class="${n <= lvl ? "on" : ""}"></i>`).join("")}</span>`;
   }
+
+  // Si la etiqueta no existe (aún sin foto), se muestra la bolsa ilustrada en su lugar.
+  document.addEventListener("error", (e) => {
+    const img = e.target;
+    if (!(img instanceof HTMLImageElement) || !img.closest(".product__media")) return;
+    const card = img.closest(".product"); const idx = PRODUCTS.findIndex((x) => x.id === card?.dataset.id);
+    if (idx < 0) return;
+    PRODUCTS[idx].imagen = "";
+    img.closest(".product__media").classList.remove("product__media--label");
+    img.outerHTML = bagSVG(PRODUCTS[idx], idx);
+  }, true);
 
   function cardHTML(p, idx) {
     const sel = selection.get(p.id);
