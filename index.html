@@ -2,7 +2,7 @@
 <html lang="es-CL">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-qOhFsq0QMV2REqNwk5hGH5bZE9SkX6gt6yeyKdYPv+U='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://docs.google.com https://*.googleusercontent.com; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self' https://wa.me https://api.whatsapp.com; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-qOhFsq0QMV2REqNwk5hGH5bZE9SkX6gt6yeyKdYPv+U='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://docs.google.com https://*.googleusercontent.com https://script.google.com; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self' https://wa.me https://api.whatsapp.com; upgrade-insecure-requests">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Niebla · Tostaduría mágica en Machalí, Chile | Café de especialidad</title>
   <meta name="description" content="Niebla es una tostaduría de café de especialidad en Machalí, Chile. Café tostado con dedicación en pequeños lotes, talleres de filtrados y espresso. Envíos a todo Chile.">
@@ -298,6 +298,11 @@
             <p class="learn__tag">Fecha de tostado y reposo</p>
             <p>Cada bolsa lleva escrita su fecha de tostado. Los primeros días el café libera CO₂: déjalo reposar. Su punto mágico va de los 5 a los 30 días desde el tueste.</p>
           </div>
+        </div>
+        <div id="quiz" class="card quiz reveal" aria-labelledby="quiz-title">
+          <p class="learn__tag">Encuentra tu café</p>
+          <h3 id="quiz-title">¿Qué origen te espera?</h3>
+          <div id="quiz-body" aria-live="polite"></div>
         </div>
         <div id="products" class="products" aria-live="polite">
           <p class="products__loading">Invocando el catálogo…</p>

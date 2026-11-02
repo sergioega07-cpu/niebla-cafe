@@ -582,6 +582,7 @@
       return;
     }
     e.currentTarget.href = waLink(buildOrderMessage());
+    rememberOrder();
     clearForm();
   });
 
@@ -843,6 +844,119 @@
   }
   fog();
 
+  /* ---------- Quiz "Encuentra tu café" + memoria local ---------- */
+  // URL del Web App de Google Apps Script (apps-script/clientes.gs). Vacía = no se envía nada.
+  const APPS_SCRIPT_URL = "";
+  const QUIZ_KEY = "niebla-quiz-v1";
+  const LAST_ORDER_KEY = "niebla-ultimo-pedido-v1";
+  const norm = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const readLS = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+  const writeLS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* modo privado */ } };
+  function sendCliente(data) {
+    if (!APPS_SCRIPT_URL || !data.whatsapp) return;
+    try { fetch(APPS_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(data) }).catch(() => {}); } catch { /* */ }
+  }
+  // Molienda según método (solo moliendas que existen en la planilla)
+  const QUIZ = [
+    { k: "metodo", q: "¿Cómo lo preparas?", o: [
+      ["espresso", "Espresso", "Molido espresso"], ["moka", "Moka / italiana", "Molido espresso"],
+      ["filtro", "Filtrado (V60, Chemex, goteo)", "Molido filtro"], ["prensa", "Prensa francesa", "Molido prensa francesa"],
+      ["grano", "Lo muelo en casa", "Grano"]] },
+    { k: "sabor", q: "¿Qué sabores te gustan?", o: [
+      ["chocolate", "Chocolate y frutos secos"], ["frutal", "Frutal y cítrico"], ["dulce", "Dulce y acaramelado"]] },
+    { k: "proceso", q: "¿Qué perfil buscas?", o: [
+      ["lavado", "Limpio y brillante (proceso lavado)"], ["natural", "Intenso y con cuerpo (proceso natural)"], ["igual", "Me da igual"]] },
+    { k: "cafeina", q: "¿Con o sin cafeína?", o: [["con", "Con cafeína"], ["sin", "Descafeinado"]] },
+  ];
+  // Palabras de notas_sabor (de la planilla) que cuentan para cada sabor
+  const SABOR_WORDS = {
+    chocolate: ["cacao", "chocolate", "avellana", "frutos secos", "nuez", "almendra"],
+    frutal: ["naranja", "mandarina", "pina", "damasco", "berries", "maracuya", "limon", "frutilla", "durazno", "manzana", "uva", "cereza"],
+    dulce: ["caramelo", "panela", "miel", "dulce de leche", "toffee", "azucar", "chancaca"],
+  };
+  function recommend(r) {
+    const metodo = QUIZ[0].o.find((x) => x[0] === r.metodo);
+    const words = SABOR_WORDS[r.sabor] || [];
+    let best = null;
+    PRODUCTS.forEach((p, idx) => {
+      const fi = p.formatos.findIndex((f) => f.stock > 0); if (fi < 0) return;
+      const decaf = /descafeinado/.test(norm(p.categoria + " " + p.nombre));
+      if ((r.cafeina === "sin") !== decaf) return;
+      const notas = norm(p.notas.join(" "));
+      let score = words.filter((w) => notas.includes(w)).length * 2;
+      if (r.proceso !== "igual" && norm(p.proceso).includes(r.proceso)) score += 1;
+      if (!best || score > best.score) best = { p, fi, score, idx };
+    });
+    if (!best) return null;
+    const f = best.p.formatos[best.fi];
+    const molienda = f.moliendas.includes(metodo?.[2]) ? metodo[2] : f.moliendas[0];
+    return { id: best.p.id, molienda };
+  }
+  let quizStep = 0, quizAns = {};
+  function quizResultHTML(saved) {
+    const p = productById(saved.cafe_recomendado);
+    const f = p && p.formatos[p.formatos.findIndex((x) => x.stock > 0)];
+    const last = readLS(LAST_ORDER_KEY);
+    const lastHTML = last && last.items && last.items.length ? `<p>Tu último pedido (${esc(last.fecha)}): ${last.items.map((i) => `${esc(i.nombre)} ${esc(i.formato)} · ${esc(i.molienda)}`).join("; ")}.</p>` : "";
+    if (!p || !f) return `<p>Tu café recomendado anterior ya no tiene stock.</p>${lastHTML}<div class="quiz__actions"><button type="button" class="btn btn--primary" data-quiz="restart">Hacer el quiz</button></div>`;
+    return `<p class="quiz__step">${saved.vuelta ? "Tu recomendación" : "Te recomendamos"}</p>
+      <h3>${esc(p.nombre)}</h3>
+      <p>${esc(p.origen || "")}${p.proceso ? ` · ${esc(p.proceso)}` : ""} · Molienda sugerida: <strong>${esc(saved.molienda)}</strong></p>
+      ${p.notas.length ? `<ul class="notes" aria-label="Notas de sabor">${p.notas.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
+      ${lastHTML}
+      ${saved.whatsapp || saved.vuelta ? "" : `<label class="quiz__wa"><span class="opt-label">Tu WhatsApp (opcional)</span><input type="tel" id="quiz-wa" inputmode="tel" maxlength="16" placeholder="+56 9 1234 5678" autocomplete="tel"><small>Para recordar tus preferencias en Niebla.</small></label>`}
+      <div class="quiz__actions">
+        <button type="button" class="btn btn--primary" data-quiz="add">Agregar ${esc(f.formato)} al carrito · ${clp(f.precio)}</button>
+        <button type="button" class="quiz__link" data-quiz="restart">Repetir el quiz</button>
+      </div>`;
+  }
+  function renderQuiz() {
+    const body = $("#quiz-body"); if (!body) return;
+    const saved = readLS(QUIZ_KEY);
+    if (quizStep === 0 && saved && saved.cafe_recomendado && !quizAns._fresh) { body.innerHTML = quizResultHTML({ ...saved, vuelta: true }); return; }
+    if (quizStep >= QUIZ.length) { body.innerHTML = quizResultHTML(saved || {}); return; }
+    const s = QUIZ[quizStep];
+    body.innerHTML = `<p class="quiz__step">Pregunta ${quizStep + 1} de ${QUIZ.length}</p><p>${esc(s.q)}</p>
+      <div class="seg" role="group">${s.o.map((o) => `<button type="button" data-quiz="ans" data-v="${esc(o[0])}" aria-pressed="${quizAns[s.k] === o[0]}">${esc(o[1])}</button>`).join("")}</div>`;
+  }
+  $("#quiz-body")?.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-quiz]"); if (!b) return;
+    const act = b.dataset.quiz;
+    if (act === "restart") { quizStep = 0; quizAns = { _fresh: true }; renderQuiz(); return; }
+    if (act === "ans") {
+      quizAns[QUIZ[quizStep].k] = b.dataset.v; quizStep++;
+      if (quizStep >= QUIZ.length) {
+        const { _fresh, ...resp } = quizAns;
+        const rec = recommend(resp);
+        if (!rec) { $("#quiz-body").innerHTML = `<p>Ahora no hay un café con stock para esa combinación. Escríbenos por WhatsApp y te ayudamos a elegir.</p><div class="quiz__actions"><button type="button" class="quiz__link" data-quiz="restart">Repetir el quiz</button></div>`; return; }
+        writeLS(QUIZ_KEY, { respuestas: resp, cafe_recomendado: rec.id, molienda: rec.molienda, fecha: new Date().toISOString().slice(0, 10) });
+      }
+      renderQuiz(); return;
+    }
+    if (act === "add") {
+      const saved = readLS(QUIZ_KEY) || {};
+      const wa = $("#quiz-wa");
+      if (wa && wa.value.trim()) {
+        if (!phoneValid(wa.value)) { toast("Revisa tu WhatsApp: +56 9 y 8 dígitos"); wa.focus(); return; }
+        saved.whatsapp = "56" + phoneDigits(wa.value); writeLS(QUIZ_KEY, saved);
+        const p0 = productById(saved.cafe_recomendado);
+        sendCliente({ tipo: "quiz", nombre: localStorage.getItem(NAME_KEY) || "", whatsapp: saved.whatsapp, respuestas: saved.respuestas, cafe_recomendado: p0 ? p0.nombre : saved.cafe_recomendado, molienda: saved.molienda });
+      }
+      const p = productById(saved.cafe_recomendado); if (!p) return;
+      const f = p.formatos[p.formatos.findIndex((x) => x.stock > 0)]; if (!f) return;
+      addToCart(p, f, f.moliendas.includes(saved.molienda) ? saved.molienda : f.moliendas[0]);
+      renderQuiz();
+    }
+  });
+  function rememberOrder() {
+    writeLS(LAST_ORDER_KEY, { fecha: new Date().toISOString().slice(0, 10), items: cart.map((i) => ({ nombre: i.nombre, formato: i.formato, molienda: i.molienda })) });
+    const saved = readLS(QUIZ_KEY) || {};
+    const wa = tipo() === "envio" && phoneValid(val("phone")) ? "56" + phoneDigits(val("phone")) : (saved.whatsapp || "");
+    const rec = saved.cafe_recomendado ? productById(saved.cafe_recomendado) : null;
+    sendCliente({ tipo: "pedido", nombre: val("name"), whatsapp: wa, respuestas: saved.respuestas || "", cafe_recomendado: rec ? rec.nombre : "",
+      cafe: cart.map((i) => `${i.nombre} ${i.formato} x${i.qty}`).join("; "), molienda: [...new Set(cart.map((i) => i.molienda))].join("; ") });
+  }
+
   /* ---------- Inicio ---------- */
   renderCart();
   loadCatalog()
@@ -852,6 +966,7 @@
       syncScrollPad();
       renderProducts();
       reconcileCart(); renderCart();
+      renderQuiz();
       injectProductLD(prods);
     })
     .catch((err) => {
