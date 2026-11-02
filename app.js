@@ -66,7 +66,7 @@
   const isHidden = (v) => /^(no|false|0|n)$/i.test(String(v || "").trim());
   const toInt = (v) => { const n = parseInt(String(v).replace(/[^\d-]/g, ""), 10); return Number.isFinite(n) ? n : 0; };
 
-  const LABEL_BY_ID = { gabriela: "espantapajaros-gabriela", huila: "espantapajaros-huila" };
+  const LABEL_BY_ID = { gabriela: "espantapajaros-gabriela", huila: "huila-2026-11" };
   const safeImg = (u) => {
     const v = String(u || "").trim(); if (!v) return "";
     try { const x = new URL(v, location.href); return x.protocol === "https:" || (x.origin === location.origin && !/^[a-z][a-z0-9+.-]*:/i.test(v)) ? v : ""; } catch { return ""; }
