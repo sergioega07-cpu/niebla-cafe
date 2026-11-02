@@ -18,6 +18,8 @@
   // Pegar aquí el enlace de Google Sheets > Archivo > Compartir > Publicar en la web > (hoja) > CSV.
   // Ej: "https://docs.google.com/spreadsheets/d/e/2PACX-XXXX/pub?gid=0&single=true&output=csv"
   // Mientras esté vacío (o falle), se usa assets/productos-ejemplo.csv y se muestra el aviso "Datos de ejemplo".
+  const PROMO = { precio: 10000, desde: Date.parse("2026-11-02T00:00:00-03:00"), hasta: Date.parse("2026-11-08T23:59:59-03:00") };
+  const promoOn = () => { const t = Date.now(); return t >= PROMO.desde && t <= PROMO.hasta; };
   const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR3q6EliurFneCq_EGOYeC24JWwfwXeNEB3nK0h0StznvtLdKEsoLL2iW-ts4K6KXtlrzdmt6tdstM5/pub?gid=356496886&single=true&output=csv";
   const LOCAL_CSV_URL = "assets/productos-ejemplo.csv";
   const WA_NUMBER = "56940220026";
@@ -97,6 +99,10 @@
       });
     }
     const list = [...map.values()];
+    // Promo de Carlos: 250 g a $10.000 hasta el 8-nov-2026 23:59:59 (Chile, UTC-3). Después se apaga sola.
+    if (promoOn()) for (const p of list) for (const f of p.formatos) {
+      if (grams(f.formato) === 250 && f.precio > PROMO.precio) { f.precioNormal = f.precio; f.precio = PROMO.precio; }
+    }
     for (const p of list) {
       p.formatos.sort((a, b) => grams(a.formato) - grams(b.formato));
       for (const f of p.formatos) if (!f.moliendas.length) f.moliendas = ["Grano", "Molido"];
@@ -243,7 +249,7 @@
           </label>
         </div>
         <div class="product__buy">
-          <p class="price" data-role="price">${clp(f.precio)}<small>${esc(f.formato)}</small></p>
+          <p class="price" data-role="price">${f.precioNormal ? `<s class="price__was">${clp(f.precioNormal)}</s> ` : ""}${clp(f.precio)}<small>${esc(f.formato)}</small></p>
           <button type="button" class="btn btn--primary" data-act="add" ${f.stock <= 0 ? "disabled" : ""}>${f.stock <= 0 ? "Sin stock" : "Añadir"}</button>
         </div>
       </div>
@@ -965,19 +971,20 @@
     // Tras el quiz (recomendación guardada): una frase por parada, rotando
     const POST = ["¿Vas a dejar que tu café se pierda?", "Vamos... ve por tu café", "Te lo mereces...", "Para eso trabajas..."];
     const POST_S = 3; let postI = 0;
+    const PROMO_L = ["Atento aprendiz…", "Tenemos una promoción para ti…"];
     const quizDone = () => !!(readLS(QUIZ_KEY) || {}).cafe_recomendado;
     const FLY_S = 8, LINE_S = 2.5, BW = 64, BH = 56, GAP = 16;
     const INTER = 'a,button,input,select,textarea,label,summary,[role="button"],[onclick],[tabindex]:not([tabindex="-1"]),.product,.price,.mission__price,.cart-item,.wa-float,.nav,.header,.menu';
     const seed = Math.random() * 1000;
     let px = innerWidth * 0.3, py = innerHeight * 0.4, ang = Math.random() * 6.28, tilt = 0, last = performance.now();
-    let stopPost = false, mode = "fly", flown = 0, retry = 0, tx = 0, ty = 0, stopT = 0, side = 1, recheck = 0, sp = 60;
+    let stopPost = false, stopPromo = false, mode = "fly", flown = 0, retry = 0, tx = 0, ty = 0, stopT = 0, side = 1, recheck = 0, sp = 60;
     const noise = (s) => Math.sin(s * 0.37) + 0.6 * Math.sin(s * 0.91 + 1.7) + 0.35 * Math.sin(s * 1.73 + 4.1);
     const zone = () => { const W = innerWidth, H = innerHeight; return { x0: W * 0.03, x1: W * 0.97 - BW, y0: Math.max(70, H * 0.12), y1: H * 0.86 - BH }; };
     // Tamaño máximo de la nube (mide ambos textos una vez visible el layout)
     let sayW = 0, sayH = 0;
     function measure() {
       say.style.visibility = "hidden"; say.hidden = false; sayW = sayH = 0;
-      for (const l of LINES.concat(POST)) { sayTxt.textContent = l; const r = say.getBoundingClientRect(); sayW = Math.max(sayW, r.width); sayH = Math.max(sayH, r.height); }
+      for (const l of LINES.concat(POST, PROMO_L)) { sayTxt.textContent = l; const r = say.getBoundingClientRect(); sayW = Math.max(sayW, r.width); sayH = Math.max(sayH, r.height); }
       say.hidden = true; say.style.visibility = "";
     }
     // Nube a un lado del grano, hacia el centro de la pantalla, sin salirse del viewport
@@ -1033,7 +1040,10 @@
         if (mode === "stop") {
           stopT += dt; recheck -= dt;
           if (recheck <= 0) { recheck = 0.25; if (!safeAt(px, py, blockers())) stopT = 99; } // si el scroll trae algo debajo, se va
-          const want = stopPost ? (stopT < POST_S ? POST[postI % POST.length] : null) : (stopT < LINE_S ? LINES[0] : stopT < LINE_S * 2 ? LINES[1] : null);
+          // Durante la promo, cada parada abre con las dos frases de promo y luego sigue con las de siempre
+          const pre = stopPromo ? PROMO_L : [], seq = pre.concat(stopPost ? [POST[postI % POST.length]] : LINES);
+          const durs = pre.map(() => LINE_S).concat(stopPost ? [POST_S] : LINES.map(() => LINE_S));
+          let acc = 0, want = null; for (let i = 0; i < seq.length; i++) { acc += durs[i]; if (stopT < acc) { want = seq[i]; break; } }
           if (!want) { hideSay(); mode = "fly"; flown = 0; sp = 0; if (stopPost) postI++; }
           else if (want !== say.dataset.line) showLine(want);
           tilt += (0 - tilt) * Math.min(1, dt * 4);
@@ -1054,7 +1064,7 @@
             let a = Math.atan2(dy, dx) - ang; a = Math.atan2(Math.sin(a), Math.cos(a));
             turn = a * 5 + noise(s) * 0.3 * Math.min(1, d / 120);
             speed = Math.min(Math.max(speed, 90), 18 + d * 1.2); // frena suave al acercarse (desde ~185 px)
-            if (d < 3) { px = tx; py = ty; mode = "stop"; stopT = 0; recheck = 0.25; stopPost = quizDone(); }
+            if (d < 3) { px = tx; py = ty; mode = "stop"; stopT = 0; recheck = 0.25; stopPost = quizDone(); stopPromo = promoOn(); }
           } else {
             turn = noise(s) * 1.4; // giros más amplios y frecuentes
             const m = 90, out = Math.max(z.x0 + m - px, px - (z.x1 - m), z.y0 + m - py, py - (z.y1 - m), 0);
@@ -1069,7 +1079,7 @@
             ang += turn * dt;
             if (mode === "seek") {
               const dx = tx - px, dy = ty - py, d = Math.hypot(dx, dy);
-              if (d < 60) { const k = Math.min(1, (sp * dt) / (d || 1)); px += dx * k; py += dy * k; if (d - sp * dt < 3) { px = tx; py = ty; mode = "stop"; stopT = 0; recheck = 0.25; stopPost = quizDone(); } } // tramo final directo, sin orbitar
+              if (d < 60) { const k = Math.min(1, (sp * dt) / (d || 1)); px += dx * k; py += dy * k; if (d - sp * dt < 3) { px = tx; py = ty; mode = "stop"; stopT = 0; recheck = 0.25; stopPost = quizDone(); stopPromo = promoOn(); } } // tramo final directo, sin orbitar
               else { px += Math.cos(ang) * sp * dt; py += Math.sin(ang) * sp * dt; }
             }
             else { px = Math.min(z.x1, Math.max(z.x0, px + Math.cos(ang) * sp * dt)); py = Math.min(z.y1, Math.max(z.y0, py + Math.sin(ang) * sp * dt)); }
@@ -1086,9 +1096,10 @@
     addEventListener("resize", () => { sayW = 0; });
     $("#bean-open").addEventListener("click", () => {
       // Tras el quiz: agrega el recomendado en 250 g (molienda por defecto del botón Añadir) y abre el carrito.
-      // Sin stock o sin 250 g: abre la recomendación como antes. Si ya está en el carrito, solo lo abre.
+      // Sin 250 g: el formato con stock más cercano. Sin ningún formato con stock: abre la recomendación. Si ya está en el carrito, solo lo abre.
       const rec = (readLS(QUIZ_KEY) || {}).cafe_recomendado, p = rec && productById(rec);
-      const f = p && p.formatos.find((x) => grams(x.formato) === 250);
+      // Formato con stock más cercano a 250 g (empate: el más chico)
+      const f = p && p.formatos.filter((x) => x.stock > 0).sort((a, b) => Math.abs(grams(a.formato) - 250) - Math.abs(grams(b.formato) - 250) || grams(a.formato) - grams(b.formato))[0];
       if (f && f.stock > 0) {
         if (!cart.some((i) => i.id === p.id && i.formato === f.formato)) addToCart(p, f, f.moliendas[0]);
         openCart(); return;
