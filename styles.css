@@ -742,3 +742,5 @@ body.cart-open .bean, body:has(.menu.is-open) .bean { display: none; }
   .bitacora__photo { aspect-ratio: auto; min-height: 100%; }
   .bitacora__entry:nth-child(even) .bitacora__photo { order: 2; }
 }
+.footer__panel { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-top: .5rem; border-radius: 50%; color: currentColor; opacity: .4; transition: opacity .2s; }
+.footer__panel:hover, .footer__panel:focus-visible { opacity: .9; }
