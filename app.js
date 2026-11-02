@@ -846,7 +846,7 @@
 
   /* ---------- Quiz "Encuentra tu café" + memoria local ---------- */
   // URL del Web App de Google Apps Script (apps-script/clientes.gs). Vacía = no se envía nada.
-  const APPS_SCRIPT_URL = "";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUwqAv6bdfybDxXZRjusxx4nxU6Cafr1uYLlzWw4uTwEfYMRXlF5HAA-hxNj-DJxzR/exec";
   const QUIZ_KEY = "niebla-quiz-v1";
   const LAST_ORDER_KEY = "niebla-ultimo-pedido-v1";
   const norm = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
