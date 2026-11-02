@@ -521,6 +521,7 @@
     const count = $("#cart-count"); count.hidden = n === 0; count.textContent = n;
     $("#cart-open").setAttribute("aria-label", n ? `Abrir carrito (${n} productos)` : "Abrir carrito");
     updateSendLink();
+    if (PRODUCTS.length) renderCartRec();
   }
   function updateSendLink() {
     const a = $("#cart-send"), status = $("#cart-status");
@@ -930,6 +931,8 @@
         const rec = recommend(resp);
         if (!rec) { $("#quiz-body").innerHTML = `<p>Ahora no hay un café con stock para esa combinación. Escríbenos por WhatsApp y te ayudamos a elegir.</p><div class="quiz__actions"><button type="button" class="quiz__link" data-quiz="restart">Repetir el quiz</button></div>`; return; }
         writeLS(QUIZ_KEY, { respuestas: resp, cafe_recomendado: rec.id, molienda: rec.molienda, fecha: new Date().toISOString().slice(0, 10) });
+        const bn = $("#bean"); if (bn) bn.hidden = true; // quiz terminado: el grano no vuelve
+        renderCartRec();
       }
       renderQuiz(); return;
     }
@@ -945,20 +948,20 @@
       const p = productById(saved.cafe_recomendado); if (!p) return;
       const f = p.formatos[p.formatos.findIndex((x) => x.stock > 0)]; if (!f) return;
       addToCart(p, f, f.moliendas.includes(saved.molienda) ? saved.molienda : f.moliendas[0]);
-      renderQuiz();
+      renderQuiz(); renderCartRec();
     }
   });
   // Grano dorado con alitas: vuela lento y abre el quiz en un diálogo
   const BEAN_KEY = "niebla-grano-quieto-v1";
   const bean = $("#bean"), dlg = $("#quiz-dialog");
   if (bean && dlg && dlg.showModal) {
-    bean.hidden = false;
+    bean.hidden = !!(readLS(QUIZ_KEY) || {}).cafe_recomendado;
     let docked = reduceMotion; try { docked = docked || localStorage.getItem(BEAN_KEY) === "1"; } catch { /* */ }
     const dock = () => { docked = true; bean.classList.add("is-docked"); };
     if (docked) dock();
     const t0 = performance.now() * Math.random();
     (function fly(t) {
-      if (docked) return;
+      if (docked || bean.hidden) return;
       if (!document.hidden && !dlg.open) {
         const W = innerWidth, H = innerHeight, s = (t + t0) / 1000;
         // Recorrido amplio y lento (Lissajous) por la zona central-izquierda, lejos del botón del carrito
@@ -974,6 +977,20 @@
     dlg.addEventListener("close", () => $("#bean-open").focus({ preventScroll: true }));
     $("#quiz-body").addEventListener("click", (e) => { if (e.target.closest('[data-quiz="add"]') && cart.length) setTimeout(() => dlg.close(), 0); });
   }
+  // Línea "Tu café" en el carrito, desde la recomendación guardada
+  function recItem() {
+    const saved = readLS(QUIZ_KEY) || {};
+    const p = saved.cafe_recomendado && productById(saved.cafe_recomendado); if (!p) return null;
+    const f = p.formatos.find((x) => x.stock > 0);
+    return { p, f, mol: f && f.moliendas.includes(saved.molienda) ? saved.molienda : (f ? f.moliendas[0] : saved.molienda) };
+  }
+  function renderCartRec() {
+    const el = $("#cart-rec"); if (!el) return;
+    const r = recItem(); el.hidden = !r; if (!r) return;
+    el.disabled = !r.f;
+    el.innerHTML = `Tu café: <strong>${esc(r.p.nombre)}</strong> · ${esc(r.mol)}${r.f ? ` · <span>+ Agregar ${esc(r.f.formato)} (${clp(r.f.precio)})</span>` : " · Sin stock"}`;
+  }
+  $("#cart-rec")?.addEventListener("click", () => { const r = recItem(); if (r && r.f) addToCart(r.p, r.f, r.mol); });
   function rememberOrder() {
     writeLS(LAST_ORDER_KEY, { fecha: new Date().toISOString().slice(0, 10), items: cart.map((i) => ({ nombre: i.nombre, formato: i.formato, molienda: i.molienda })) });
     const saved = readLS(QUIZ_KEY) || {};
