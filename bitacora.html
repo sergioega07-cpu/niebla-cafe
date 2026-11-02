@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-qOhFsq0QMV2REqNwk5hGH5bZE9SkX6gt6yeyKdYPv+U='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://docs.google.com https://*.googleusercontent.com https://script.google.com https://bitacora.nieblacoffee.cl; manifest-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self' https://wa.me https://api.whatsapp.com; upgrade-insecure-requests">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>La bitácora del brujo · Niebla · Tostaduría mágica</title>
+  <meta name="description" content="La bitácora del brujo: notas de tueste, recetas y música de Niebla, tostaduría de café de especialidad en Machalí.">
+  <meta name="theme-color" content="#080605">
+  <link rel="icon" href="assets/niebla-emblema-solido.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="assets/favicon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <!-- URL pública (GitHub Pages). Si se usa dominio propio, cambiarla aquí, en og:*, JSON-LD y SITE_URL de app.js -->
+  <link rel="canonical" href="https://nieblacoffee.cl/bitacora.html">
+
+  <!-- Open Graph / redes -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_CL">
+  <meta property="og:site_name" content="Niebla · Tostaduría mágica">
+  <meta property="og:title" content="La bitácora del brujo · Niebla">
+  <meta property="og:description" content="Café de especialidad tostado con dedicación en Machalí, Chile. Mira el café disponible y pide directo por WhatsApp. Envíos a todo Chile.">
+  <meta property="og:url" content="https://nieblacoffee.cl/bitacora.html">
+  <meta property="og:image" content="https://nieblacoffee.cl/assets/og-niebla.jpg?v=3">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="assets/fonts/amarante.woff2" as="font" type="font/woff2" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20261102g">
+  <script>document.documentElement.classList.add("js")</script>
+</head>
+<body>
+  <a class="skip" href="#bitacora">Saltar a la bitácora</a>
+  <div class="atmos" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="nav" id="nav">
+    <a href="./" class="nav__brand" aria-label="Niebla, ir al inicio">
+      <img src="assets/niebla-emblema.svg" alt="" width="34" height="36">
+      <span>Niebla</span>
+    </a>
+    <nav class="nav__links" aria-label="Secciones">
+      <a href="./#nosotros" class="nav__stack"><span>Nosotros</span><span class="sr-only"> · </span><small>Misión y Visión</small></a>
+      <a href="./#aprende">Aprende</a>
+      <a href="./#misiones">Misiones</a>
+      <a href="bitacora.html" class="nav__stack is-active" aria-current="page"><span>Bitácora</span><span class="sr-only"> · </span><small>del brujo</small></a>
+      <a href="./#cafe">Café</a>
+      <a href="./#contacto">Contacto</a>
+    </nav>
+    <div class="nav__actions">
+    <a class="nav__wa js-wa" data-wa="Hola Niebla, vengo desde la web y tengo una consulta." href="https://wa.me/56940220026" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.2Z"/></svg>
+      <span>WhatsApp</span>
+    </a>
+    <button class="nav__toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir menú">
+      <span class="nav__burger" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+    </div>
+  </header>
+
+  <!-- Menú de celular: panel lateral con el índice de capítulos -->
+  <div class="menu" id="menu" hidden>
+    <div class="menu__backdrop" data-close-menu></div>
+    <nav class="menu__panel" aria-label="Menú principal">
+      <p class="menu__kicker">Índice del grimorio</p>
+      <ol class="menu__list">
+        <li><a href="./#nosotros"><span class="menu__n">I</span><span class="menu__t">Nosotros<span class="sr-only"> · </span><small class="menu__sub">Misión y Visión</small></span></a></li>
+        <li><a href="./#aprende"><span class="menu__n">II</span><span class="menu__t">Aprende</span></a></li>
+        <li><a href="./#misiones"><span class="menu__n">III</span><span class="menu__t">Misiones</span></a></li>
+        <li><a href="bitacora.html" class="is-active" aria-current="page"><span class="menu__n">IV</span><span class="menu__t">Bitácora<span class="sr-only"> · </span><small class="menu__sub">del brujo</small></span></a></li>
+        <li><a href="./#cafe"><span class="menu__n menu__n--glyph">✦</span><span class="menu__t">Café</span></a></li>
+        <li><a href="./#contacto"><span class="menu__n menu__n--glyph">✦</span><span class="menu__t">Contacto</span></a></li>
+      </ol>
+      <p class="menu__foot">Machalí, Chile · Envíos a todo Chile<br><a href="https://www.instagram.com/niebla_coffee/" target="_blank" rel="noopener">@niebla_coffee</a></p>
+    </nav>
+  </div>
+
+  <main id="bitacora" class="section bitacora">
+    <div class="wrap">
+      <header class="section__head section__head--center">
+        <p class="kicker">Notas del tostador</p>
+        <h1>La bitácora del brujo</h1>
+      </header>
+      <div id="bitacora-list" class="bitacora__list" aria-live="polite">
+        <p class="bitacora__msg">Abriendo la bitácora…</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Niebla · Tostaduría mágica · Machalí, Chile</p>
+    <p class="footer__small">Niebla Roasters SpA · RUT 78.108.362-3</p>
+    <p class="footer__small footer__links"><a href="envios.html">Envíos y plazos</a> · <a href="cambios.html">Cambios y devoluciones</a> · <a href="privacidad.html">Privacidad</a></p>
+  </footer>
+  <script src="bitacora.js?v=20261102g" defer></script>
+</body>
+</html>
