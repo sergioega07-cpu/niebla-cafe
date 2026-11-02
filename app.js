@@ -958,17 +958,36 @@
     const docked = reduceMotion; // movimiento reducido: quieto en la esquina
     try { localStorage.removeItem(BEAN_KEY); } catch { /* */ }
     if (docked) bean.classList.add("is-docked");
-    const t0 = performance.now() * Math.random();
+    // Vuelo orgánico (wander): el rumbo gira suave con "ruido" de senos, la velocidad acelera/planea,
+    // inclinación según dirección y giro, y leve flotación. Zona central-izquierda, lejos del carrito.
+    const seed = Math.random() * 1000;
+    let px = innerWidth * 0.3, py = innerHeight * 0.4, ang = Math.random() * 6.28, tilt = 0, last = performance.now();
+    const noise = (s) => Math.sin(s * 0.37) + 0.6 * Math.sin(s * 0.91 + 1.7) + 0.35 * Math.sin(s * 1.73 + 4.1);
     (function fly(t) {
       if (docked || bean.hidden) return;
+      const dt = Math.min(0.05, (t - last) / 1000); last = t;
       if (!document.hidden && !dlg.open) {
-        const W = innerWidth, H = innerHeight, s = (t + t0) / 1000;
-        // Recorrido amplio y lento (Lissajous) por la zona central-izquierda, lejos del botón del carrito
-        const x = W * (0.06 + 0.32 * (1 + Math.sin(s * 0.11)) ), y = H * (0.22 + 0.24 * (1 + Math.sin(s * 0.07 + 1.3)));
-        bean.style.transform = `translate(${Math.min(x, W - 80)}px, ${y}px) rotate(${Math.sin(s * 0.5) * 8}deg)`;
+        const W = innerWidth, H = innerHeight, s = t / 1000 + seed;
+        const x0 = W * 0.04, x1 = Math.max(x0 + 40, W * 0.7 - 64), y0 = H * 0.2, y1 = H * 0.7;
+        let turn = noise(s) * 0.55; // rad/s, cambia suave
+        // Si se acerca al borde de su zona, gira con suavidad hacia el centro (curva, no rebote)
+        const m = 60, out = Math.max(x0 + m - px, px - (x1 - m), y0 + m - py, py - (y1 - m), 0);
+        if (out > 0) {
+          let d = Math.atan2((y0 + y1) / 2 - py, (x0 + x1) / 2 - px) - ang;
+          d = Math.atan2(Math.sin(d), Math.cos(d));
+          turn += d * Math.min(1.6, out / 40);
+        }
+        ang += turn * dt;
+        const speed = 38 + 18 * Math.sin(s * 0.53 + 2) + 8 * Math.sin(s * 1.3); // ~12–64 px/s: acelera y planea
+        px = Math.min(x1, Math.max(x0, px + Math.cos(ang) * speed * dt));
+        py = Math.min(y1, Math.max(y0, py + Math.sin(ang) * speed * dt));
+        const target = Math.cos(ang) * 10 + turn * 14; // se inclina hacia donde va y al girar
+        tilt += (target - tilt) * Math.min(1, dt * 3);
+        const bob = Math.sin(s * 2.4) * 4 + Math.sin(s * 5.1) * 1.2;
+        bean.style.transform = `translate(${px.toFixed(1)}px, ${(py + bob).toFixed(1)}px) rotate(${tilt.toFixed(1)}deg)`;
       }
       requestAnimationFrame(fly);
-    })(performance.now());
+    })(last);
     $("#bean-open").addEventListener("click", () => { quizStep = 0; quizAns = {}; renderQuiz(); dlg.showModal(); });
     $("#quiz-close").addEventListener("click", () => dlg.close());
     dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
