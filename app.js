@@ -931,7 +931,7 @@
         const rec = recommend(resp);
         if (!rec) { $("#quiz-body").innerHTML = `<p>Ahora no hay un café con stock para esa combinación. Escríbenos por WhatsApp y te ayudamos a elegir.</p><div class="quiz__actions"><button type="button" class="quiz__link" data-quiz="restart">Repetir el quiz</button></div>`; return; }
         writeLS(QUIZ_KEY, { respuestas: resp, cafe_recomendado: rec.id, molienda: rec.molienda, fecha: new Date().toISOString().slice(0, 10) });
-        const bn = $("#bean"); if (bn) bn.hidden = true; // quiz terminado: el grano no vuelve
+        $("#bean-dock")?.click(); // quiz terminado: el grano queda quieto en la esquina (recordado)
         renderCartRec();
       }
       renderQuiz(); return;
@@ -955,7 +955,7 @@
   const BEAN_KEY = "niebla-grano-quieto-v1";
   const bean = $("#bean"), dlg = $("#quiz-dialog");
   if (bean && dlg && dlg.showModal) {
-    bean.hidden = !!(readLS(QUIZ_KEY) || {}).cafe_recomendado;
+    bean.hidden = false;
     let docked = reduceMotion; try { docked = docked || localStorage.getItem(BEAN_KEY) === "1"; } catch { /* */ }
     const dock = () => { docked = true; bean.classList.add("is-docked"); };
     if (docked) dock();
