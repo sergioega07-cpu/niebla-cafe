@@ -931,7 +931,6 @@
         const rec = recommend(resp);
         if (!rec) { $("#quiz-body").innerHTML = `<p>Ahora no hay un café con stock para esa combinación. Escríbenos por WhatsApp y te ayudamos a elegir.</p><div class="quiz__actions"><button type="button" class="quiz__link" data-quiz="restart">Repetir el quiz</button></div>`; return; }
         writeLS(QUIZ_KEY, { respuestas: resp, cafe_recomendado: rec.id, molienda: rec.molienda, fecha: new Date().toISOString().slice(0, 10) });
-        $("#bean-dock")?.click(); // quiz terminado: el grano queda quieto en la esquina (recordado)
         renderCartRec();
       }
       renderQuiz(); return;
@@ -956,9 +955,9 @@
   const bean = $("#bean"), dlg = $("#quiz-dialog");
   if (bean && dlg && dlg.showModal) {
     bean.hidden = false;
-    let docked = reduceMotion; try { docked = docked || localStorage.getItem(BEAN_KEY) === "1"; } catch { /* */ }
-    const dock = () => { docked = true; bean.classList.add("is-docked"); };
-    if (docked) dock();
+    const docked = reduceMotion; // movimiento reducido: quieto en la esquina
+    try { localStorage.removeItem(BEAN_KEY); } catch { /* */ }
+    if (docked) bean.classList.add("is-docked");
     const t0 = performance.now() * Math.random();
     (function fly(t) {
       if (docked || bean.hidden) return;
@@ -970,7 +969,6 @@
       }
       requestAnimationFrame(fly);
     })(performance.now());
-    $("#bean-dock").addEventListener("click", () => { dock(); try { localStorage.setItem(BEAN_KEY, "1"); } catch { /* */ } });
     $("#bean-open").addEventListener("click", () => { quizStep = 0; quizAns = {}; renderQuiz(); dlg.showModal(); });
     $("#quiz-close").addEventListener("click", () => dlg.close());
     dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
