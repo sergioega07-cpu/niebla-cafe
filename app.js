@@ -1109,11 +1109,18 @@
   }
   function renderCartRec() {
     const el = $("#cart-rec"); if (!el) return;
-    const r = recItem(); el.hidden = !r; if (!r) return;
+    const r = recItem(); el.hidden = !r;
+    const rq = $("#cart-requiz"); if (rq) rq.hidden = !(readLS(QUIZ_KEY) || {}).cafe_recomendado;
+    if (!r) return;
     el.disabled = !r.f;
     el.innerHTML = `Tu café: <strong>${esc(r.p.nombre)}</strong> · ${esc(r.mol)}${r.f ? ` · <span>+ Agregar ${esc(r.f.formato)} (${clp(r.f.precio)})</span>` : " · Sin stock"}`;
   }
   $("#cart-rec")?.addEventListener("click", () => { const r = recItem(); if (r && r.f) addToCart(r.p, r.f, r.mol); });
+  // Rehacer el quiz desde el carrito: la recomendación guardada se reemplaza solo al terminar el nuevo
+  $("#cart-requiz")?.addEventListener("click", () => {
+    const d = $("#quiz-dialog"); if (!d || !d.showModal) return;
+    closeCart(); quizStep = 0; quizAns = { _fresh: true }; renderQuiz(); d.showModal();
+  });
   function rememberOrder() {
     writeLS(LAST_ORDER_KEY, { fecha: new Date().toISOString().slice(0, 10), items: cart.map((i) => ({ nombre: i.nombre, formato: i.formato, molienda: i.molienda })) });
     const saved = readLS(QUIZ_KEY) || {};

@@ -724,6 +724,9 @@ body.cart-open .bean, body:has(.menu.is-open) .bean, body.cart-open .bean-say, b
 .cart-rec { display: block; width: 100%; margin: .6rem 0 0; padding: .7rem .9rem; min-height: 44px; text-align: left; border-radius: 10px; border: 1px dashed rgba(216, 199, 161, .25); background: none; color: var(--ink-soft); font-size: .85rem; cursor: pointer; }
 .cart-rec[hidden] { display: none; }
 .cart-rec:disabled { cursor: default; opacity: .7; }
+.cart-requiz { display: block; margin: .15rem 0 0 auto; min-height: 44px; padding: 0 .2rem; border: 0; background: none; color: var(--ink-faint); font-size: .8rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.cart-requiz:hover, .cart-requiz:focus-visible { color: var(--parchment); }
+.cart-requiz[hidden] { display: none; }
 .cart-rec strong { color: var(--parchment); font-weight: 500; }
 
 /* ---------- La bitácora del brujo ---------- */
