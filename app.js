@@ -948,6 +948,32 @@
       renderQuiz();
     }
   });
+  // Grano dorado con alitas: vuela lento y abre el quiz en un diálogo
+  const BEAN_KEY = "niebla-grano-quieto-v1";
+  const bean = $("#bean"), dlg = $("#quiz-dialog");
+  if (bean && dlg && dlg.showModal) {
+    bean.hidden = false;
+    let docked = reduceMotion; try { docked = docked || localStorage.getItem(BEAN_KEY) === "1"; } catch { /* */ }
+    const dock = () => { docked = true; bean.classList.add("is-docked"); };
+    if (docked) dock();
+    const t0 = performance.now() * Math.random();
+    (function fly(t) {
+      if (docked) return;
+      if (!document.hidden && !dlg.open) {
+        const W = innerWidth, H = innerHeight, s = (t + t0) / 1000;
+        // Recorrido amplio y lento (Lissajous) por la zona central-izquierda, lejos del botón del carrito
+        const x = W * (0.06 + 0.32 * (1 + Math.sin(s * 0.11)) ), y = H * (0.22 + 0.24 * (1 + Math.sin(s * 0.07 + 1.3)));
+        bean.style.transform = `translate(${Math.min(x, W - 80)}px, ${y}px) rotate(${Math.sin(s * 0.5) * 8}deg)`;
+      }
+      requestAnimationFrame(fly);
+    })(performance.now());
+    $("#bean-dock").addEventListener("click", () => { dock(); try { localStorage.setItem(BEAN_KEY, "1"); } catch { /* */ } });
+    $("#bean-open").addEventListener("click", () => { quizStep = 0; quizAns = {}; renderQuiz(); dlg.showModal(); });
+    $("#quiz-close").addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener("close", () => $("#bean-open").focus({ preventScroll: true }));
+    $("#quiz-body").addEventListener("click", (e) => { if (e.target.closest('[data-quiz="add"]') && cart.length) setTimeout(() => dlg.close(), 0); });
+  }
   function rememberOrder() {
     writeLS(LAST_ORDER_KEY, { fecha: new Date().toISOString().slice(0, 10), items: cart.map((i) => ({ nombre: i.nombre, formato: i.formato, molienda: i.molienda })) });
     const saved = readLS(QUIZ_KEY) || {};

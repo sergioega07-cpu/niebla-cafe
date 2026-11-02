@@ -684,8 +684,8 @@ main section[tabindex="-1"]:focus { outline: none; }
 .legal__meta { opacity: .6; font-size: .85rem; }
 
 /* ---------- Quiz "Encuentra tu café" ---------- */
-.quiz { padding: clamp(1.4rem, 3.5vw, 2.2rem); margin: 0 auto clamp(2rem, 5vw, 3rem); max-width: 1040px; }
-.quiz h3 { font-size: clamp(1.25rem, 3vw, 1.6rem); margin-bottom: .8rem; }
+.quiz { padding: clamp(1.4rem, 3.5vw, 2.2rem); margin: 0; }
+.quiz h3 { padding-right: 2.6rem; font-size: clamp(1.25rem, 3vw, 1.6rem); margin-bottom: .8rem; }
 .quiz p { color: var(--ink-soft); margin: 0 0 .9rem; }
 .quiz__step { font: 400 .64rem/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-faint); }
 .quiz .seg { flex-wrap: wrap; margin-bottom: 1rem; }
@@ -696,3 +696,21 @@ main section[tabindex="-1"]:focus { outline: none; }
 .quiz__wa small { color: var(--ink-faint); font-size: .78rem; }
 .quiz__link { background: none; border: 0; color: var(--ink-faint); text-decoration: underline; cursor: pointer; font-size: .85rem; }
 .quiz .notes { margin-bottom: 1rem; }
+
+/* ---------- Grano dorado + diálogo del quiz ---------- */
+.bean { position: fixed; left: 0; top: 0; z-index: 49; will-change: transform; }
+.bean__btn { display: grid; place-items: center; width: 64px; height: 56px; padding: 0; border: 0; background: none; cursor: pointer; filter: drop-shadow(0 0 10px rgba(224, 168, 64, .55)); }
+.bean__btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 12px; }
+.bean__wing { transform-box: fill-box; animation: bean-flap 1.6s ease-in-out infinite; }
+.bean__wing--l { transform-origin: right center; }
+.bean__wing--r { transform-origin: left center; }
+@keyframes bean-flap { 50% { transform: scaleY(.55); } }
+.bean__dock { position: absolute; top: -6px; right: -6px; width: 24px; height: 24px; border-radius: 999px; border: 1px solid rgba(216, 199, 161, .35); background: rgba(8, 6, 5, .8); color: var(--parchment); font-size: .9rem; line-height: 1; cursor: pointer; }
+.bean__dock::before { content: ""; position: absolute; inset: -10px; } /* área táctil 44px */
+.bean.is-docked { transform: none !important; left: max(1rem, env(safe-area-inset-left)); top: auto; bottom: max(1rem, env(safe-area-inset-bottom)); }
+.bean.is-docked .bean__dock { display: none; }
+body.cart-open .bean, body:has(.menu.is-open) .bean { display: none; }
+.quiz-dialog { width: min(640px, calc(100% - 2rem)); max-height: calc(100% - 2rem); padding: 0; border: 0; background: none; color: inherit; overflow: auto; }
+.quiz-dialog::backdrop { background: rgba(5, 5, 6, .6); backdrop-filter: blur(3px); }
+.quiz-dialog__close { position: absolute; top: .6rem; right: .6rem; z-index: 1; width: 44px; height: 44px; border-radius: 999px; border: 1px solid rgba(216, 199, 161, .2); background: rgba(8, 6, 5, .45); color: var(--parchment); font-size: 1.3rem; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .bean__wing { animation: none; } }
