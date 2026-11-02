@@ -958,37 +958,143 @@
     const docked = reduceMotion; // movimiento reducido: quieto en la esquina
     try { localStorage.removeItem(BEAN_KEY); } catch { /* */ }
     if (docked) bean.classList.add("is-docked");
-    // Vuelo orgánico (wander): el rumbo gira suave con "ruido" de senos, la velocidad acelera/planea,
-    // inclinación según dirección y giro, y leve flotación. Zona central-izquierda, lejos del carrito.
+    // Vuelo orgánico (wander) más rápido: rumbo con "ruido" de senos, acelera/planea, inclinación y flotación.
+    // Cada 8 s de vuelo busca un punto seguro (sin nada presionable bajo el grano ni la nube), frena y habla.
+    const say = $("#bean-say"), sayTxt = $("#bean-say-txt");
+    const LINES = ["Descubre los misterios de tu café...", "Solo debes atraparme"];
+    // Tras el quiz (recomendación guardada): una frase por parada, rotando
+    const POST = ["¿Vas a dejar que tu café se pierda?", "Vamos... ve por tu café", "Te lo mereces...", "Para eso trabajas..."];
+    const POST_S = 3; let postI = 0;
+    const quizDone = () => !!(readLS(QUIZ_KEY) || {}).cafe_recomendado;
+    const FLY_S = 8, LINE_S = 2.5, BW = 64, BH = 56, GAP = 16;
+    const INTER = 'a,button,input,select,textarea,label,summary,[role="button"],[onclick],[tabindex]:not([tabindex="-1"]),.product,.price,.mission__price,.cart-item,.wa-float,.nav,.header,.menu';
     const seed = Math.random() * 1000;
     let px = innerWidth * 0.3, py = innerHeight * 0.4, ang = Math.random() * 6.28, tilt = 0, last = performance.now();
+    let stopPost = false, mode = "fly", flown = 0, retry = 0, tx = 0, ty = 0, stopT = 0, side = 1, recheck = 0, sp = 60;
     const noise = (s) => Math.sin(s * 0.37) + 0.6 * Math.sin(s * 0.91 + 1.7) + 0.35 * Math.sin(s * 1.73 + 4.1);
+    const zone = () => { const W = innerWidth, H = innerHeight; return { x0: W * 0.03, x1: W * 0.97 - BW, y0: Math.max(70, H * 0.12), y1: H * 0.86 - BH }; };
+    // Tamaño máximo de la nube (mide ambos textos una vez visible el layout)
+    let sayW = 0, sayH = 0;
+    function measure() {
+      say.style.visibility = "hidden"; say.hidden = false; sayW = sayH = 0;
+      for (const l of LINES.concat(POST)) { sayTxt.textContent = l; const r = say.getBoundingClientRect(); sayW = Math.max(sayW, r.width); sayH = Math.max(sayH, r.height); }
+      say.hidden = true; say.style.visibility = "";
+    }
+    // Nube a un lado del grano, hacia el centro de la pantalla, sin salirse del viewport
+    function sayRect(x, y) {
+      const W = innerWidth, H = innerHeight, s = x + BW / 2 > W / 2 ? -1 : 1;
+      let l = s > 0 ? x + BW - 4 : x - sayW + 4;
+      l = Math.min(W - sayW - 8, Math.max(8, l));
+      const t = Math.min(H - sayH - 8, Math.max(8, y - sayH + 14));
+      return { l, t, r: l + sayW, b: t + sayH, s };
+    }
+    function blockers() {
+      const out = [], H = innerHeight, W = innerWidth;
+      for (const el of document.querySelectorAll(INTER)) {
+        if (el.closest("#bean, #bean-say, dialog")) continue;
+        for (const r of el.getClientRects()) {
+          if (r.width && r.height && r.bottom > -GAP && r.top < H + GAP && r.right > -GAP && r.left < W + GAP) out.push(r);
+        }
+      }
+      return out;
+    }
+    const hit = (a, rs) => rs.some((r) => a.l < r.right + GAP && a.r > r.left - GAP && a.t < r.bottom + GAP && a.b > r.top - GAP);
+    function safeAt(x, y, rs) {
+      const c = sayRect(x, y);
+      return !hit({ l: x, t: y - 6, r: x + BW, b: y + BH + 6 }, rs) && !hit(c, rs);
+    }
+    // Candidatos en rejilla dentro de la zona; el más cercano, favoreciendo los que quedan hacia adelante
+    function findSafe() {
+      const z = zone(), rs = blockers(); let best = null, bs = Infinity;
+      for (let y = z.y0; y <= z.y1; y += 20) for (let x = z.x0; x <= z.x1; x += 20) {
+        if (!safeAt(x, y, rs)) continue;
+        const dx = x - px, dy = y - py, d = Math.hypot(dx, dy);
+        const ahead = d ? (dx * Math.cos(ang) + dy * Math.sin(ang)) / d : 1;
+        const score = d * (1.4 - 0.4 * ahead);
+        if (score < bs) { bs = score; best = [x, y]; }
+      }
+      return best;
+    }
+    function showLine(i) {
+      const c = sayRect(px, py);
+      sayTxt.textContent = i;
+      say.classList.toggle("is-left", c.s < 0);
+      say.style.transform = `translate(${c.l.toFixed(1)}px, ${c.t.toFixed(1)}px)`;
+      say.hidden = false; say.dataset.line = i;
+      requestAnimationFrame(() => say.classList.add("is-on"));
+    }
+    function hideSay() { say.classList.remove("is-on"); say.hidden = true; delete say.dataset.line; }
     (function fly(t) {
       if (docked || bean.hidden) return;
       const dt = Math.min(0.05, (t - last) / 1000); last = t;
-      if (!document.hidden && !dlg.open) {
-        const W = innerWidth, H = innerHeight, s = t / 1000 + seed;
-        const x0 = W * 0.04, x1 = Math.max(x0 + 40, W * 0.7 - 64), y0 = H * 0.2, y1 = H * 0.7;
-        let turn = noise(s) * 0.55; // rad/s, cambia suave
-        // Si se acerca al borde de su zona, gira con suavidad hacia el centro (curva, no rebote)
-        const m = 60, out = Math.max(x0 + m - px, px - (x1 - m), y0 + m - py, py - (y1 - m), 0);
-        if (out > 0) {
-          let d = Math.atan2((y0 + y1) / 2 - py, (x0 + x1) / 2 - px) - ang;
-          d = Math.atan2(Math.sin(d), Math.cos(d));
-          turn += d * Math.min(1.6, out / 40);
+      if (!document.hidden && !dlg.open && getComputedStyle(bean).display !== "none") {
+        const s = t / 1000 + seed, z = zone();
+        let turn = 0;
+        if (mode === "stop") {
+          stopT += dt; recheck -= dt;
+          if (recheck <= 0) { recheck = 0.25; if (!safeAt(px, py, blockers())) stopT = 99; } // si el scroll trae algo debajo, se va
+          const want = stopPost ? (stopT < POST_S ? POST[postI % POST.length] : null) : (stopT < LINE_S ? LINES[0] : stopT < LINE_S * 2 ? LINES[1] : null);
+          if (!want) { hideSay(); mode = "fly"; flown = 0; sp = 0; if (stopPost) postI++; }
+          else if (want !== say.dataset.line) showLine(want);
+          tilt += (0 - tilt) * Math.min(1, dt * 4);
+        } else {
+          if (mode === "fly") {
+            flown += dt; retry -= dt;
+            if (flown >= FLY_S && retry <= 0) {
+              if (!sayW) measure();
+              const p = findSafe();
+              if (p) { [tx, ty] = p; mode = "seek"; recheck = 0.3; } else retry = 1.5; // sin lugar seguro: sigue y reintenta
+            }
+          }
+          let speed = 150 + 65 * Math.sin(s * 0.53 + 2) + 25 * Math.sin(s * 1.3); // ~60–240 px/s
+          if (mode === "seek") {
+            recheck -= dt;
+            if (recheck <= 0) { recheck = 0.3; if (!safeAt(tx, ty, blockers())) { const p = findSafe(); if (p) [tx, ty] = p; else { mode = "fly"; retry = 1.5; } } }
+            const dx = tx - px, dy = ty - py, d = Math.hypot(dx, dy);
+            let a = Math.atan2(dy, dx) - ang; a = Math.atan2(Math.sin(a), Math.cos(a));
+            turn = a * 5 + noise(s) * 0.3 * Math.min(1, d / 120);
+            speed = Math.min(Math.max(speed, 90), 18 + d * 1.2); // frena suave al acercarse (desde ~185 px)
+            if (d < 3) { px = tx; py = ty; mode = "stop"; stopT = 0; recheck = 0.25; stopPost = quizDone(); }
+          } else {
+            turn = noise(s) * 1.4; // giros más amplios y frecuentes
+            const m = 90, out = Math.max(z.x0 + m - px, px - (z.x1 - m), z.y0 + m - py, py - (z.y1 - m), 0);
+            if (out > 0) {
+              let d = Math.atan2((z.y0 + z.y1) / 2 - py, (z.x0 + z.x1) / 2 - px) - ang;
+              d = Math.atan2(Math.sin(d), Math.cos(d));
+              turn += d * Math.min(3, out / 25);
+            }
+          }
+          if (mode !== "stop") {
+            sp += (speed - sp) * Math.min(1, dt * 3); // acelera suave (también al despegar)
+            ang += turn * dt;
+            if (mode === "seek") {
+              const dx = tx - px, dy = ty - py, d = Math.hypot(dx, dy);
+              if (d < 60) { const k = Math.min(1, (sp * dt) / (d || 1)); px += dx * k; py += dy * k; if (d - sp * dt < 3) { px = tx; py = ty; mode = "stop"; stopT = 0; recheck = 0.25; stopPost = quizDone(); } } // tramo final directo, sin orbitar
+              else { px += Math.cos(ang) * sp * dt; py += Math.sin(ang) * sp * dt; }
+            }
+            else { px = Math.min(z.x1, Math.max(z.x0, px + Math.cos(ang) * sp * dt)); py = Math.min(z.y1, Math.max(z.y0, py + Math.sin(ang) * sp * dt)); }
+            const target = Math.cos(ang) * 12 + Math.max(-1.5, Math.min(1.5, turn)) * 10;
+            tilt += (target - tilt) * Math.min(1, dt * 3);
+          }
         }
-        ang += turn * dt;
-        const speed = 38 + 18 * Math.sin(s * 0.53 + 2) + 8 * Math.sin(s * 1.3); // ~12–64 px/s: acelera y planea
-        px = Math.min(x1, Math.max(x0, px + Math.cos(ang) * speed * dt));
-        py = Math.min(y1, Math.max(y0, py + Math.sin(ang) * speed * dt));
-        const target = Math.cos(ang) * 10 + turn * 14; // se inclina hacia donde va y al girar
-        tilt += (target - tilt) * Math.min(1, dt * 3);
-        const bob = Math.sin(s * 2.4) * 4 + Math.sin(s * 5.1) * 1.2;
+        const bob = mode === "stop" ? Math.sin(s * 2.4) * 3 : Math.sin(s * 2.4) * 4 + Math.sin(s * 5.1) * 1.2;
         bean.style.transform = `translate(${px.toFixed(1)}px, ${(py + bob).toFixed(1)}px) rotate(${tilt.toFixed(1)}deg)`;
-      }
+      } else if (mode === "stop") { hideSay(); mode = "fly"; flown = 0; }
       requestAnimationFrame(fly);
     })(last);
-    $("#bean-open").addEventListener("click", () => { quizStep = 0; quizAns = {}; renderQuiz(); dlg.showModal(); });
+    say.addEventListener("click", () => $("#bean-open").click());
+    addEventListener("resize", () => { sayW = 0; });
+    $("#bean-open").addEventListener("click", () => {
+      // Tras el quiz: agrega el recomendado en 250 g (molienda por defecto del botón Añadir) y abre el carrito.
+      // Sin stock o sin 250 g: abre la recomendación como antes. Si ya está en el carrito, solo lo abre.
+      const rec = (readLS(QUIZ_KEY) || {}).cafe_recomendado, p = rec && productById(rec);
+      const f = p && p.formatos.find((x) => grams(x.formato) === 250);
+      if (f && f.stock > 0) {
+        if (!cart.some((i) => i.id === p.id && i.formato === f.formato)) addToCart(p, f, f.moliendas[0]);
+        openCart(); return;
+      }
+      quizStep = 0; quizAns = {}; renderQuiz(); dlg.showModal();
+    });
     $("#quiz-close").addEventListener("click", () => dlg.close());
     dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
     dlg.addEventListener("close", () => $("#bean-open").focus({ preventScroll: true }));
