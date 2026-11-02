@@ -18,7 +18,7 @@
   // Pegar aquí el enlace de Google Sheets > Archivo > Compartir > Publicar en la web > (hoja) > CSV.
   // Ej: "https://docs.google.com/spreadsheets/d/e/2PACX-XXXX/pub?gid=0&single=true&output=csv"
   // Mientras esté vacío (o falle), se usa assets/productos-ejemplo.csv y se muestra el aviso "Datos de ejemplo".
-  const PROMO = { precio: 10000, desde: Date.parse("2026-11-02T00:00:00-03:00"), hasta: Date.parse("2026-11-08T23:59:59-03:00") };
+  const PROMO = { precio: 10000, excluir: ["espantapajaros-descafeinado"], desde: Date.parse("2026-11-02T00:00:00-03:00"), hasta: Date.parse("2026-11-08T23:59:59-03:00") };
   const promoOn = () => { const t = Date.now(); return t >= PROMO.desde && t <= PROMO.hasta; };
   const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR3q6EliurFneCq_EGOYeC24JWwfwXeNEB3nK0h0StznvtLdKEsoLL2iW-ts4K6KXtlrzdmt6tdstM5/pub?gid=356496886&single=true&output=csv";
   const LOCAL_CSV_URL = "assets/productos-ejemplo.csv";
@@ -100,7 +100,7 @@
     }
     const list = [...map.values()];
     // Promo de Carlos: 250 g a $10.000 hasta el 8-nov-2026 23:59:59 (Chile, UTC-3). Después se apaga sola.
-    if (promoOn()) for (const p of list) for (const f of p.formatos) {
+    if (promoOn()) for (const p of list) if (!PROMO.excluir.includes(p.id)) for (const f of p.formatos) {
       if (grams(f.formato) === 250 && f.precio > PROMO.precio) { f.precioNormal = f.precio; f.precio = PROMO.precio; }
     }
     for (const p of list) {
