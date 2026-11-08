@@ -956,19 +956,14 @@
       renderQuiz(); renderCartRec();
     }
   });
-  // Grano dorado con alitas: vuela lento y abre el quiz en un diálogo
-  const BEAN_KEY = "niebla-grano-quieto-v1";
+  // Grano dorado con alitas: vuela en la portada y abre el quiz
   const bean = $("#bean"), dlg = $("#quiz-dialog");
   if (bean && dlg && dlg.showModal) {
     bean.hidden = false;
-    const docked = reduceMotion; // movimiento reducido: quieto en la esquina
-    try { localStorage.removeItem(BEAN_KEY); } catch { /* */ }
+    const docked = reduceMotion;
     if (docked) bean.classList.add("is-docked");
-    // Vuelo orgánico (wander) más rápido: rumbo con "ruido" de senos, acelera/planea, inclinación y flotación.
-    // Cada 8 s de vuelo busca un punto seguro (sin nada presionable bajo el grano ni la nube), frena y habla.
     const say = $("#bean-say"), sayTxt = $("#bean-say-txt");
     const LINES = ["Descubre los misterios de tu café...", "Solo debes atraparme"];
-    // Tras el quiz (recomendación guardada): una frase por parada, rotando
     const POST = ["¿Vas a dejar que tu café se pierda?", "Vamos... ve por tu café", "Te lo mereces...", "Para eso trabajas..."];
     const POST_S = 3; let postI = 0;
     const PROMO_L = ["Atento aprendiz…", "Tenemos una promoción para ti…"];
@@ -976,31 +971,55 @@
     const FLY_S = 8, LINE_S = 2.5, BW = 64, BH = 56, GAP = 16;
     const INTER = 'a,button,input,select,textarea,label,summary,[role="button"],[onclick],[tabindex]:not([tabindex="-1"]),.product,.price,.mission__price,.cart-item,.wa-float,.nav,.header,.menu';
     const seed = Math.random() * 1000;
-    let px = innerWidth * 0.3, py = innerHeight * 0.4, ang = Math.random() * 6.28, tilt = 0, last = performance.now();
-    let stopPost = false, stopPromo = false, mode = "fly", flown = 0, retry = 0, tx = 0, ty = 0, stopT = 0, side = 1, recheck = 0, sp = 60;
+    const heroEl = () => bean.closest(".hero") || $("#portada");
+    let pinned = false;
+    const size = () => {
+      if (pinned) {
+        const h = heroEl();
+        return { W: (h && h.clientWidth) || innerWidth, H: (h && h.clientHeight) || innerHeight };
+      }
+      return { W: innerWidth, H: innerHeight };
+    };
+    let px = size().W * 0.3, py = size().H * 0.4, ang = Math.random() * 6.28, tilt = 0, last = performance.now();
+    let stopPost = false, stopPromo = false, mode = "fly", flown = 0, retry = 0, tx = 0, ty = 0, stopT = 0, recheck = 0, sp = 60;
     const noise = (s) => Math.sin(s * 0.37) + 0.6 * Math.sin(s * 0.91 + 1.7) + 0.35 * Math.sin(s * 1.73 + 4.1);
-    const zone = () => { const W = innerWidth, H = innerHeight; return { x0: W * 0.03, x1: W * 0.97 - BW, y0: Math.max(70, H * 0.12), y1: H * 0.86 - BH }; };
-    // Tamaño máximo de la nube (mide ambos textos una vez visible el layout)
+    const zone = () => { const { W, H } = size(); return { x0: W * 0.03, x1: W * 0.97 - BW, y0: Math.max(70, H * 0.12), y1: H * 0.86 - BH }; };
+    function clampToZone() {
+      const z = zone();
+      px = Math.min(z.x1, Math.max(z.x0, px));
+      py = Math.min(z.y1, Math.max(z.y0, py));
+      if (mode === "seek" && (tx < z.x0 || tx > z.x1 || ty < z.y0 || ty > z.y1)) { mode = "fly"; flown = 0; retry = 0; }
+    }
+    function applyPin() {
+      const should = scrollY > 12;
+      if (should === pinned) { if (pinned) clampToZone(); return; }
+      const hr = heroEl().getBoundingClientRect();
+      if (should) { px -= hr.left; py -= hr.top; bean.style.position = "absolute"; say.style.position = "absolute"; pinned = true; }
+      else { px += hr.left; py += hr.top; bean.style.position = "fixed"; say.style.position = "fixed"; pinned = false; }
+      clampToZone();
+      if (mode === "stop") hideSay();
+    }
     let sayW = 0, sayH = 0;
     function measure() {
       say.style.visibility = "hidden"; say.hidden = false; sayW = sayH = 0;
       for (const l of LINES.concat(POST, PROMO_L)) { sayTxt.textContent = l; const r = say.getBoundingClientRect(); sayW = Math.max(sayW, r.width); sayH = Math.max(sayH, r.height); }
       say.hidden = true; say.style.visibility = "";
     }
-    // Nube a un lado del grano, hacia el centro de la pantalla, sin salirse del viewport
     function sayRect(x, y) {
-      const W = innerWidth, H = innerHeight, s = x + BW / 2 > W / 2 ? -1 : 1;
+      const { W, H } = size(), s = x + BW / 2 > W / 2 ? -1 : 1;
       let l = s > 0 ? x + BW - 4 : x - sayW + 4;
       l = Math.min(W - sayW - 8, Math.max(8, l));
       const t = Math.min(H - sayH - 8, Math.max(8, y - sayH + 14));
       return { l, t, r: l + sayW, b: t + sayH, s };
     }
     function blockers() {
-      const out = [], H = innerHeight, W = innerWidth;
+      const out = [], { W, H } = size();
+      const hr = pinned ? heroEl().getBoundingClientRect() : { left: 0, top: 0 };
       for (const el of document.querySelectorAll(INTER)) {
         if (el.closest("#bean, #bean-say, dialog")) continue;
         for (const r of el.getClientRects()) {
-          if (r.width && r.height && r.bottom > -GAP && r.top < H + GAP && r.right > -GAP && r.left < W + GAP) out.push(r);
+          const left = r.left - hr.left, top = r.top - hr.top, right = r.right - hr.left, bottom = r.bottom - hr.top;
+          if (r.width && r.height && bottom > -GAP && top < H + GAP && right > -GAP && left < W + GAP) out.push({ left, top, right, bottom });
         }
       }
       return out;
@@ -1010,7 +1029,6 @@
       const c = sayRect(x, y);
       return !hit({ l: x, t: y - 6, r: x + BW, b: y + BH + 6 }, rs) && !hit(c, rs);
     }
-    // Candidatos en rejilla dentro de la zona; el más cercano, favoreciendo los que quedan hacia adelante
     function findSafe() {
       const z = zone(), rs = blockers(); let best = null, bs = Infinity;
       for (let y = z.y0; y <= z.y1; y += 20) for (let x = z.x0; x <= z.x1; x += 20) {
@@ -1039,8 +1057,7 @@
         let turn = 0;
         if (mode === "stop") {
           stopT += dt; recheck -= dt;
-          if (recheck <= 0) { recheck = 0.25; if (!safeAt(px, py, blockers())) stopT = 99; } // si el scroll trae algo debajo, se va
-          // Durante la promo, cada parada abre con las dos frases de promo y luego sigue con las de siempre
+          if (recheck <= 0) { recheck = 0.25; if (!safeAt(px, py, blockers())) stopT = 99; }
           const pre = stopPromo ? PROMO_L : [], seq = pre.concat(stopPost ? [POST[postI % POST.length]] : LINES);
           const durs = pre.map(() => LINE_S).concat(stopPost ? [POST_S] : LINES.map(() => LINE_S));
           let acc = 0, want = null; for (let i = 0; i < seq.length; i++) { acc += durs[i]; if (stopT < acc) { want = seq[i]; break; } }
@@ -1053,20 +1070,20 @@
             if (flown >= FLY_S && retry <= 0) {
               if (!sayW) measure();
               const p = findSafe();
-              if (p) { [tx, ty] = p; mode = "seek"; recheck = 0.3; } else retry = 1.5; // sin lugar seguro: sigue y reintenta
+              if (p) { [tx, ty] = p; mode = "seek"; recheck = 0.3; } else retry = 1.5;
             }
           }
-          let speed = 150 + 65 * Math.sin(s * 0.53 + 2) + 25 * Math.sin(s * 1.3); // ~60–240 px/s
+          let speed = 150 + 65 * Math.sin(s * 0.53 + 2) + 25 * Math.sin(s * 1.3);
           if (mode === "seek") {
             recheck -= dt;
             if (recheck <= 0) { recheck = 0.3; if (!safeAt(tx, ty, blockers())) { const p = findSafe(); if (p) [tx, ty] = p; else { mode = "fly"; retry = 1.5; } } }
             const dx = tx - px, dy = ty - py, d = Math.hypot(dx, dy);
             let a = Math.atan2(dy, dx) - ang; a = Math.atan2(Math.sin(a), Math.cos(a));
             turn = a * 5 + noise(s) * 0.3 * Math.min(1, d / 120);
-            speed = Math.min(Math.max(speed, 90), 18 + d * 1.2); // frena suave al acercarse (desde ~185 px)
+            speed = Math.min(Math.max(speed, 90), 18 + d * 1.2);
             if (d < 3) { px = tx; py = ty; mode = "stop"; stopT = 0; recheck = 0.25; stopPost = quizDone(); stopPromo = promoOn(); }
           } else {
-            turn = noise(s) * 1.4; // giros más amplios y frecuentes
+            turn = noise(s) * 1.4;
             const m = 90, out = Math.max(z.x0 + m - px, px - (z.x1 - m), z.y0 + m - py, py - (z.y1 - m), 0);
             if (out > 0) {
               let d = Math.atan2((z.y0 + z.y1) / 2 - py, (z.x0 + z.x1) / 2 - px) - ang;
@@ -1075,11 +1092,11 @@
             }
           }
           if (mode !== "stop") {
-            sp += (speed - sp) * Math.min(1, dt * 3); // acelera suave (también al despegar)
+            sp += (speed - sp) * Math.min(1, dt * 3);
             ang += turn * dt;
             if (mode === "seek") {
               const dx = tx - px, dy = ty - py, d = Math.hypot(dx, dy);
-              if (d < 60) { const k = Math.min(1, (sp * dt) / (d || 1)); px += dx * k; py += dy * k; if (d - sp * dt < 3) { px = tx; py = ty; mode = "stop"; stopT = 0; recheck = 0.25; stopPost = quizDone(); stopPromo = promoOn(); } } // tramo final directo, sin orbitar
+              if (d < 60) { const k = Math.min(1, (sp * dt) / (d || 1)); px += dx * k; py += dy * k; if (d - sp * dt < 3) { px = tx; py = ty; mode = "stop"; stopT = 0; recheck = 0.25; stopPost = quizDone(); stopPromo = promoOn(); } }
               else { px += Math.cos(ang) * sp * dt; py += Math.sin(ang) * sp * dt; }
             }
             else { px = Math.min(z.x1, Math.max(z.x0, px + Math.cos(ang) * sp * dt)); py = Math.min(z.y1, Math.max(z.y0, py + Math.sin(ang) * sp * dt)); }
@@ -1093,12 +1110,10 @@
       requestAnimationFrame(fly);
     })(last);
     say.addEventListener("click", () => $("#bean-open").click());
-    addEventListener("resize", () => { sayW = 0; });
+    addEventListener("resize", () => { sayW = 0; applyPin(); });
+    addEventListener("scroll", applyPin, { passive: true });
     $("#bean-open").addEventListener("click", () => {
-      // Tras el quiz: agrega el recomendado en 250 g (molienda por defecto del botón Añadir) y abre el carrito.
-      // Sin 250 g: el formato con stock más cercano. Sin ningún formato con stock: abre la recomendación. Si ya está en el carrito, solo lo abre.
       const rec = (readLS(QUIZ_KEY) || {}).cafe_recomendado, p = rec && productById(rec);
-      // Formato con stock más cercano a 250 g (empate: el más chico)
       const f = p && p.formatos.filter((x) => x.stock > 0).sort((a, b) => Math.abs(grams(a.formato) - 250) - Math.abs(grams(b.formato) - 250) || grams(a.formato) - grams(b.formato))[0];
       if (f && f.stock > 0) {
         if (!cart.some((i) => i.id === p.id && i.formato === f.formato)) addToCart(p, f, f.moliendas[0]);
@@ -1111,7 +1126,7 @@
     dlg.addEventListener("close", () => $("#bean-open").focus({ preventScroll: true }));
     $("#quiz-body").addEventListener("click", (e) => { if (e.target.closest('[data-quiz="add"]') && cart.length) setTimeout(() => dlg.close(), 0); });
   }
-  // Línea "Tu café" en el carrito, desde la recomendación guardada
+      // Línea "Tu café" en el carrito, desde la recomendación guardada
   function recItem() {
     const saved = readLS(QUIZ_KEY) || {};
     const p = saved.cafe_recomendado && productById(saved.cafe_recomendado); if (!p) return null;
