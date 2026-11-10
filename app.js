@@ -95,6 +95,7 @@
         formato: r.formato || "Único",
         precio: toInt(r.precio_clp),
         stock: hasStock(r.stock),
+        low: isLowStock(r.stock),
         moliendas: (r.molienda || "").split(/[|;]/).map((s) => s.trim()).filter(Boolean),
       });
     }
@@ -115,13 +116,18 @@
     return m ? parseFloat(m[1]) * (m[2] === "kg" ? 1000 : 1) : 1e9;
   }
   const totalStock = (p) => p.formatos.reduce((s, f) => s + Math.max(0, f.stock), 0);
-  const stockState = (n) => (n <= 0 ? { key: "out", label: "Sin stock" } : { key: "ok", label: "Con stock" });
-  // Stock binario: "SI" / "Con stock" / cualquier número > 0 = hay (tope 99 por carrito); vacío, "NO", "Sin stock", "Agotado" o 0 = no hay.
+  const stockState = (f) => (f.stock <= 0 ? { key: "out", label: "Sin stock" } : f.low ? { key: "low", label: "Poco stock" } : { key: "ok", label: "Con stock" });
+  // Stock: "SI" / "Con stock" / cualquier número > 0 = hay (tope 99 por carrito);
+  // "poco stock" / "poco" = hay, con badge «Poco stock»; vacío, "NO", "Sin stock", "Agotado" o 0 = no hay.
+  function normStock(v) {
+    return String(v || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+  function isLowStock(v) { return /^(poco stock|poco)$/.test(normStock(v)); }
   function hasStock(v) {
-    const t = String(v || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const t = normStock(v);
     if (!t || /^(no|sin stock|agotado|0+)$/.test(t)) return 0;
     if (/^\d+$/.test(t)) return parseInt(t, 10) > 0 ? 99 : 0;
-    return /^(si|s|yes|hay|con stock|disponible|x)$/.test(t) ? 99 : 0;
+    return /^(si|s|yes|hay|con stock|disponible|x|poco stock|poco)$/.test(t) ? 99 : 0;
   }
 
   async function fetchText(url) {
@@ -212,7 +218,7 @@
   function cardHTML(p, idx) {
     const sel = selection.get(p.id);
     const f = p.formatos[sel.f];
-    const st = stockState(f.stock);
+    const st = stockState(f);
     const allOut = totalStock(p) <= 0;
     const media = p.imagen
       ? `<img src="${esc(p.imagen)}" alt="Etiqueta de ${esc(p.nombre)}${p.origen ? ` · ${esc(p.origen)}` : ""}" width="520" height="800" loading="lazy" decoding="async">`
